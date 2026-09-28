@@ -1,0 +1,45 @@
+# .NET
+bin/
+obj/
+backend/.tools/
+.vs/
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rtifacts/
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+**/Properties/launchSettings.json
+
+# User secrets
+**/secrets.json
+**/appsettings.Development.json
+
+# Node
+node_modules/
+dist/
+.npm
+*.tsbuildinfo
+.vite/
+
+# Env / local secrets
+.env
+.env.local
+.env.*.local
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/*
+!.vscode/extensions.json
