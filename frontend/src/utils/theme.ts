@@ -5,30 +5,28 @@ const DASHBOARD_CACHE_KEY = 'life.dashboardCache'
 
 export function getStoredTheme(): ThemeMode {
   const value = localStorage.getItem(THEME_KEY)
-  if (value === 'light' || value === 'dark' || value === 'system') return value
-  return 'system'
+  if (value === 'light' || value === 'dark') return value
+  if (value === 'system') {
+    const resolved = window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light'
+    localStorage.setItem(THEME_KEY, resolved)
+    return resolved
+  }
+  return 'light'
 }
 
 export function setStoredTheme(mode: ThemeMode): void {
   localStorage.setItem(THEME_KEY, mode)
 }
 
-export function resolveTheme(mode: ThemeMode): 'light' | 'dark' {
-  if (mode === 'system') {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light'
-  }
-  return mode
-}
-
 export function applyTheme(mode: ThemeMode): 'light' | 'dark' {
-  const resolved = resolveTheme(mode)
+  const resolved = mode === 'dark' ? 'dark' : 'light'
   const root = document.documentElement
   root.classList.toggle('dark', resolved === 'dark')
   const meta = document.querySelector('meta[name="theme-color"]')
   if (meta) {
-    meta.setAttribute('content', resolved === 'dark' ? '#111111' : '#F7F7F5')
+    meta.setAttribute('content', resolved === 'dark' ? '#181818' : '#F7F7F5')
   }
   return resolved
 }

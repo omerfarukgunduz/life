@@ -22,6 +22,24 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
     }
 }
 
+public class ChangeEmailRequestValidator : AbstractValidator<ChangeEmailRequest>
+{
+    public ChangeEmailRequestValidator()
+    {
+        RuleFor(x => x.NewEmail).NotEmpty().WithMessage("E-posta zorunludur.").EmailAddress().WithMessage("Geçerli bir e-posta girin.");
+        RuleFor(x => x.CurrentPassword).NotEmpty().WithMessage("Mevcut parola zorunludur.");
+    }
+}
+
+public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRequest>
+{
+    public ChangePasswordRequestValidator()
+    {
+        RuleFor(x => x.CurrentPassword).NotEmpty().WithMessage("Mevcut parola zorunludur.");
+        RuleFor(x => x.NewPassword).NotEmpty().WithMessage("Yeni parola zorunludur.").MinimumLength(8).WithMessage("Parola en az 8 karakter olmalıdır.");
+    }
+}
+
 public class CreateTaskRequestValidator : AbstractValidator<CreateTaskRequest>
 {
     public CreateTaskRequestValidator()

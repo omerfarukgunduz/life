@@ -1,13 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Star } from 'lucide-react'
+import { formatShortDate } from '../../utils'
 import { useState } from 'react'
 import {
+  BookCover,
   BottomSheet,
   Button,
   Dialog,
   EmptyState,
   PageHeader,
-  Tabs,
+  SegmentControl,
 } from '../../components'
 import { DesktopAddButton } from '../../layouts/AppShell'
 import { useQuickAdd } from '../../hooks/useQuickAdd'
@@ -59,7 +61,8 @@ export default function BooksPage() {
         action={<DesktopAddButton onClick={() => openCreate('book')} label="Ekle" />}
       />
 
-      <Tabs
+      <SegmentControl
+        ariaLabel="Kitap durumu"
         className="mb-4"
         items={tabs}
         value={status}
@@ -86,34 +89,59 @@ export default function BooksPage() {
         />
       ) : null}
 
-      <ul>
+      {data.length > 0 ? (
+      <ul className="surface divide-y divide-divider px-4">
         {data.map((book) => (
           <li key={book.id}>
             <button
               type="button"
-              className="flex w-full min-h-11 flex-col items-start border-b border-border py-3 text-left last:border-b-0"
+              className="flex w-full items-center gap-3 py-3 text-left"
               onClick={() => setEditing(book)}
             >
-              <p className="text-[15px] font-medium text-text">{book.title}</p>
-              <p className="text-[13px] text-secondary">{book.author}</p>
-              {book.status === 'Read' ? (
-                <div className="mt-1 flex items-center gap-2 text-[13px] text-secondary">
-                  <span>{statusLabel.Read}</span>
-                  {book.rating != null ? (
-                    <span className="inline-flex items-center gap-0.5">
-                      <Star size={12} className="fill-text text-text" />
-                      {book.rating}
-                    </span>
-                  ) : null}
-                </div>
-              ) : null}
-              {book.note ? (
-                <p className="mt-1 line-clamp-2 text-[13px] text-secondary">{book.note}</p>
-              ) : null}
+              <BookCover title={book.title} author={book.author} />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[15px] font-semibold text-text">
+                  {book.title}
+                </span>
+                <span className="mt-0.5 block truncate text-[13px] text-secondary">
+                  {book.author}
+                </span>
+                {book.status === 'Reading' ? (
+                  <span className="mt-2 block text-[12px] text-secondary">Okuyorum</span>
+                ) : null}
+                {book.status === 'WantToRead' ? (
+                  <span className="mt-2 block text-[12px] text-secondary">
+                    {statusLabel.WantToRead}
+                  </span>
+                ) : null}
+                {book.status === 'Read' ? (
+                  <span className="mt-2 flex items-center gap-2 text-[12px] text-secondary">
+                    {book.rating != null ? (
+                      <span className="inline-flex items-center gap-0.5 text-text">
+                        {Array.from({ length: 5 }, (_, index) => (
+                          <Star
+                            key={index}
+                            size={12}
+                            className={
+                              index < book.rating!
+                                ? 'fill-[#111111] text-[#111111] dark:fill-white dark:text-white'
+                                : 'text-[#D4D4D2]'
+                            }
+                          />
+                        ))}
+                      </span>
+                    ) : (
+                      <span>{statusLabel.Read}</span>
+                    )}
+                    {book.finishedAt ? <span>{formatShortDate(book.finishedAt)}</span> : null}
+                  </span>
+                ) : null}
+              </span>
             </button>
           </li>
         ))}
       </ul>
+      ) : null}
 
       <BottomSheet
         open={editing !== null}

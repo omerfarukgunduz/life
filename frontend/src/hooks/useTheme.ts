@@ -6,18 +6,10 @@ import { applyTheme, getStoredTheme, setStoredTheme } from '../utils/theme'
 export type ThemePreference = ThemeMode
 
 export function useTheme() {
-  const [preference, setPreferenceState] = useState<ThemeMode>(() =>
-    getStoredTheme(),
-  )
+  const [preference, setPreferenceState] = useState<ThemeMode>(() => getStoredTheme())
 
   useEffect(() => {
     applyTheme(preference)
-    if (preference !== 'system') return
-
-    const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    const onChange = () => applyTheme('system')
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
   }, [preference])
 
   const setPreference = useCallback((next: ThemeMode) => {
@@ -25,20 +17,10 @@ export function useTheme() {
     setPreferenceState(next)
   }, [])
 
-  const resolved: 'light' | 'dark' =
-    preference === 'dark'
-      ? 'dark'
-      : preference === 'light'
-        ? 'light'
-        : typeof window !== 'undefined' &&
-            window.matchMedia('(prefers-color-scheme: dark)').matches
-          ? 'dark'
-          : 'light'
-
   return {
     preference,
     setPreference,
-    resolved,
+    resolved: preference,
     mode: preference,
     setMode: setPreference,
   }

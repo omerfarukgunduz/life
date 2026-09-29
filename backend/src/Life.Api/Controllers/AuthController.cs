@@ -63,5 +63,38 @@ public class AuthController : ControllerBase
         return user is null ? Unauthorized() : Ok(new MeResponse(user.Id, user.Email, user.CreatedAt));
     }
 
+    [Authorize]
+    [HttpPut("email")]
+    public async Task<ActionResult<MeResponse>> ChangeEmail([FromBody] ChangeEmailRequest request, CancellationToken ct)
+    {
+        var userId = User.GetUserId();
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, ct);
+        if (user is null) return Unauthorized();
+        if (_passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.CurrentPassword) == PasswordVerificationResult.Failed)
+            return BadRequest(new ProblemDetails { Status = 400, Title = "Parola hatalı", Detail = "Mevcut parola doğru değil." });
+
+        var email = request.NewEmail.Trim().ToLowerInvariant();
+        if (await _db.Users.AnyAsync(u => u.Email == email && u.Id != userId, ct))
+            return Conflict(new ProblemDetails { Status = 409, Title = "E-posta kullanımda", Detail = "Bu e-posta adresi zaten kayıtlı." });
+
+        user.Email = email;
+        await _db.SaveChangesAsync(ct);
+        return Ok(new MeResponse(user.Id, user.Email, user.CreatedAt));
+    }
+
+    [Authorize]
+    [HttpPut("password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken ct)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == User.GetUserId(), ct);
+        if (user is null) return Unauthorized();
+        if (_passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.CurrentPassword) == PasswordVerificationResult.Failed)
+            return BadRequest(new ProblemDetails { Status = 400, Title = "Parola hatalı", Detail = "Mevcut parola doğru değil." });
+
+        user.PasswordHash = _passwordHasher.HashPassword(user, request.NewPassword);
+        await _db.SaveChangesAsync(ct);
+        return NoContent();
+    }
+
     private static ProblemDetails Problem(string detail) => new() { Status = 401, Title = "Yetkisiz", Detail = detail };
 }

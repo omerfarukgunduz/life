@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
-import { PageHeader, SegmentControl } from '../../components'
+import { IconTile, PageHeader, SegmentControl, typeTone } from '../../components'
 import { calendarApi } from '../../services/endpoints'
 import type { CalendarItem, CalendarItemType } from '../../types'
 import {
@@ -123,20 +123,23 @@ export default function CalendarPage() {
             <p className="text-[14px] text-secondary">Yakın tarihte olay yok.</p>
           ) : null}
           {agendaDates.map((date) => (
-            <section key={date}>
-              <h2 className="mb-2 text-[14px] font-semibold text-text">
+            <section key={date} className="surface px-4 py-3">
+              <h2 className="text-[14px] font-semibold text-text">
                 {formatDayMonthWeekday(date)}
               </h2>
-              <ul>
+              <ul className="mt-1 divide-y divide-divider">
                 {(byDate.get(date) ?? []).map((item) => (
                   <li
                     key={`${item.type}-${item.entityId}-${item.time ?? ''}`}
-                    className="border-b border-border py-2.5 text-[14px] last:border-b-0"
+                    className="flex items-center gap-3 py-3 text-[14px]"
                   >
-                    <span className="text-secondary">
-                      {item.time ?? '—'} / {typeLabel[item.type]} /
-                    </span>{' '}
-                    <span className="font-medium text-text">{item.title}</span>
+                    <IconTile {...typeTone(item.type)} size="sm" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-medium text-text">{item.title}</span>
+                      <span className="text-[13px] text-secondary">
+                        {[item.time?.slice(0, 5), typeLabel[item.type]].filter(Boolean).join(' · ')}
+                      </span>
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -144,7 +147,7 @@ export default function CalendarPage() {
           ))}
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="surface space-y-4 p-4">
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"
@@ -186,7 +189,7 @@ export default function CalendarPage() {
                   className={cn(
                     'relative flex aspect-square flex-col items-center justify-center rounded-[10px] text-[13px]',
                     !inMonth && 'text-secondary/50',
-                    selected && 'bg-primary text-primary-fg',
+                    selected && 'bg-accent text-white',
                     !selected && inMonth && 'text-text',
                   )}
                 >
@@ -195,7 +198,7 @@ export default function CalendarPage() {
                     <span
                       className={cn(
                         'absolute bottom-1 size-1 rounded-full',
-                        selected ? 'bg-primary-fg' : 'bg-accent',
+                        selected ? 'bg-white' : 'bg-accent',
                       )}
                       aria-hidden
                     />
@@ -212,16 +215,19 @@ export default function CalendarPage() {
             {selectedItems.length === 0 ? (
               <p className="text-[14px] text-secondary">Bu günde olay yok.</p>
             ) : (
-              <ul>
+              <ul className="divide-y divide-divider">
                 {selectedItems.map((item) => (
                   <li
                     key={`${item.type}-${item.entityId}-${item.time ?? ''}`}
-                    className="border-b border-border py-2.5 text-[14px] last:border-b-0"
+                    className="flex items-center gap-3 py-3 text-[14px]"
                   >
-                    <span className="text-secondary">
-                      {item.time ?? '—'} / {typeLabel[item.type]} /
-                    </span>{' '}
-                    <span className="font-medium text-text">{item.title}</span>
+                    <IconTile {...typeTone(item.type)} size="sm" />
+                    <span className="min-w-0">
+                      <span className="block truncate font-medium text-text">{item.title}</span>
+                      <span className="text-[13px] text-secondary">
+                        {[item.time?.slice(0, 5), typeLabel[item.type]].filter(Boolean).join(' · ')}
+                      </span>
+                    </span>
                   </li>
                 ))}
               </ul>

@@ -1,21 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { Search, SlidersHorizontal } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import {
+  Avatar,
   BottomSheet,
   Button,
-  Checkbox,
   Dialog,
   EmptyState,
+  IconButton,
   PageHeader,
   SegmentControl,
+  TaskRow,
 } from '../../components'
 import { DesktopAddButton } from '../../layouts/AppShell'
 import { useQuickAdd } from '../../hooks/useQuickAdd'
 import { useToast } from '../../context/ToastContext'
 import { tasksApi } from '../../services/endpoints'
-import type { Task, TaskFilter } from '../../types'
+import type { Priority, Task, TaskFilter } from '../../types'
 import { TaskForm } from './TaskForm'
-import { cn } from '../../utils/cn'
 
 const filters: { id: TaskFilter; label: string }[] = [
   { id: 'today', label: 'Bugün' },
@@ -36,10 +38,21 @@ function taskToInput(task: Task, isCompleted: boolean) {
   }
 }
 
+const priorities: { id: Priority | 'all'; label: string }[] = [
+  { id: 'all', label: 'Tümü' },
+  { id: 'High', label: 'Yüksek' },
+  { id: 'Normal', label: 'Normal' },
+  { id: 'Low', label: 'Düşük' },
+]
+
 export default function TasksPage() {
   const [filter, setFilter] = useState<TaskFilter>('today')
   const [editing, setEditing] = useState<Task | null>(null)
   const [deleting, setDeleting] = useState<Task | null>(null)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const [priority, setPriority] = useState<Priority | 'all'>('all')
+  const [filterOpen, setFilterOpen] = useState(false)
   const { openCreate } = useQuickAdd()
   const { toast } = useToast()
   const qc = useQueryClient()
@@ -96,12 +109,54 @@ export default function TasksPage() {
     },
   })
 
+  const visible = useMemo(() => {
+    const q = search.trim().toLocaleLowerCase('tr')
+    return data.filter((task) => {
+      if (priority !== 'all' && task.priority !== priority) return false
+      if (!q) return true
+      return task.title.toLocaleLowerCase('tr').includes(q)
+    })
+  }, [data, priority, search])
+
   return (
     <section>
       <PageHeader
         title="Görevler"
+        trailing={
+          <>
+            <IconButton
+              label="Ara"
+              variant="soft"
+              onClick={() => setSearchOpen((open) => !open)}
+            >
+              <Search size={18} strokeWidth={1.75} />
+            </IconButton>
+            <IconButton
+              label="Filtrele"
+              variant="soft"
+              onClick={() => setFilterOpen(true)}
+              className="relative"
+            >
+              <SlidersHorizontal size={18} strokeWidth={1.75} />
+              {priority !== 'all' ? (
+                <span className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-accent" />
+              ) : null}
+            </IconButton>
+            <Avatar />
+          </>
+        }
         action={<DesktopAddButton onClick={() => openCreate('task')} label="Görev ekle" />}
       />
+
+      {searchOpen ? (
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Görev ara"
+          aria-label="Görev ara"
+          className="mb-4 min-h-11 w-full rounded-[12px] border border-border bg-surface px-3 text-base text-text placeholder:text-secondary"
+        />
+      ) : null}
 
       <SegmentControl
         ariaLabel="Görev filtresi"
@@ -119,7 +174,7 @@ export default function TasksPage() {
         </div>
       ) : null}
 
-      {!isLoading && data.length === 0 ? (
+      {!isLoading && visible.length === 0 ? (
         <EmptyState
           message="Görev yok."
           actionLabel="Görev ekle"
@@ -127,39 +182,39 @@ export default function TasksPage() {
         />
       ) : null}
 
-      <ul>
-        {data.map((task) => (
-          <li
-            key={task.id}
-            className={cn(
-              'flex items-start gap-3 border-b border-border py-3 last:border-b-0',
-              task.isCompleted && 'opacity-45',
-            )}
-          >
-            <Checkbox
-              checked={task.isCompleted}
-              onChange={() => toggle.mutate(task)}
-              aria-label={`${task.title} tamamlandı`}
-              className="!min-h-0 pt-0.5"
+      <ul className="divide-y divide-divider">
+        {visible.map((task) => (
+          <li key={task.id}>
+            <TaskRow
+              task={task}
+              showDate
+              onToggle={() => toggle.mutate(task)}
+              onOpen={() => setEditing(task)}
             />
-            <button
-              type="button"
-              className="min-w-0 flex-1 text-left"
-              onClick={() => setEditing(task)}
-            >
-              <div className="flex items-center gap-2">
-                {task.priority === 'High' ? (
-                  <span className="size-1.5 shrink-0 rounded-full bg-text" aria-hidden />
-                ) : null}
-                <p className="truncate text-[15px] font-medium text-text">{task.title}</p>
-              </div>
-              <p className="mt-0.5 text-[13px] text-secondary">
-                {[task.category, task.dueTime, task.dueDate].filter(Boolean).join(' · ')}
-              </p>
-            </button>
           </li>
         ))}
       </ul>
+
+      <BottomSheet open={filterOpen} onClose={() => setFilterOpen(false)} title="Öncelik">
+        <ul className="space-y-1">
+          {priorities.map((item) => (
+            <li key={item.id}>
+              <button
+                type="button"
+                className="flex min-h-11 w-full items-center justify-between rounded-[12px] px-2 text-left text-[15px]"
+                onClick={() => {
+                  setPriority(item.id)
+                  setFilterOpen(false)
+                }}
+              >
+                <span className={item.id === priority ? 'font-medium text-accent' : 'text-text'}>
+                  {item.label}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </BottomSheet>
 
       <BottomSheet
         open={editing !== null}

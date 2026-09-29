@@ -6,6 +6,7 @@ type PageHeaderProps = {
   subtitle?: string
   action?: ReactNode
   actions?: ReactNode
+  trailing?: ReactNode
   className?: string
 }
 
@@ -14,13 +15,14 @@ export function PageHeader({
   subtitle,
   action,
   actions,
+  trailing,
   className,
 }: PageHeaderProps) {
   const right = actions ?? action
   return (
     <header
       className={cn(
-        'mb-5 flex items-start justify-between gap-3',
+        'mb-5 flex items-end justify-between gap-3',
         className,
       )}
     >
@@ -28,13 +30,14 @@ export function PageHeader({
         {subtitle ? (
           <p className="mb-1 text-[13px] capitalize text-secondary">{subtitle}</p>
         ) : null}
-        <h1 className="text-[22px] font-semibold tracking-tight text-text">
+        <h1 className="text-[32px] font-bold leading-[1.05] tracking-[-0.03em] text-text">
           {title}
         </h1>
       </div>
-      {right ? (
-        <div className="hidden shrink-0 items-center gap-1 lg:flex">{right}</div>
-      ) : null}
+      <div className="flex shrink-0 items-center gap-2">
+        {trailing}
+        {right ? <div className="hidden items-center gap-1 lg:flex">{right}</div> : null}
+      </div>
     </header>
   )
 }

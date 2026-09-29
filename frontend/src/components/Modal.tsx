@@ -47,7 +47,7 @@ export function Modal({
         aria-modal="true"
         aria-label={title}
         className={cn(
-          'relative z-10 w-full max-w-md overflow-hidden rounded-[14px] border border-border bg-surface',
+          'relative z-10 w-full max-w-md overflow-hidden rounded-[18px] border border-border bg-surface shadow-card',
           className,
         )}
       >

@@ -37,6 +37,16 @@ export const authApi = {
       body: { email, password },
     }),
   me: () => api<UserMe>('/auth/me'),
+  changeEmail: (newEmail: string, currentPassword: string) =>
+    api<UserMe>('/auth/email', {
+      method: 'PUT',
+      body: { newEmail, currentPassword },
+    }),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api<void>('/auth/password', {
+      method: 'PUT',
+      body: { currentPassword, newPassword },
+    }),
 }
 
 export const tasksApi = {

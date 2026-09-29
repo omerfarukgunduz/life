@@ -47,9 +47,9 @@ export function BottomSheet({
         aria-modal="true"
         aria-label={title}
         className={cn(
-          'absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-y-auto rounded-t-[14px] border border-border bg-surface shadow-[var(--shadow-sheet)]',
+          'absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-y-auto rounded-t-[18px] border border-border bg-surface shadow-sheet',
           'pb-[env(safe-area-inset-bottom)]',
-          'lg:inset-x-auto lg:bottom-8 lg:left-1/2 lg:w-full lg:max-w-lg lg:-translate-x-1/2 lg:rounded-[14px]',
+          'lg:inset-x-auto lg:bottom-8 lg:left-1/2 lg:w-full lg:max-w-lg lg:-translate-x-1/2 lg:rounded-[18px]',
           className,
         )}
       >

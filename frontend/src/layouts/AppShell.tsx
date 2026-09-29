@@ -13,6 +13,8 @@ import {
 import { BottomNavigation } from '../components/BottomNavigation'
 import { BottomSheet } from '../components/BottomSheet'
 import { Button } from '../components/Button'
+import { IconTile } from '../components/IconTile'
+import { quickAddOptions } from '../utils/collectionIcons'
 import { useOnline } from '../hooks/useOnline'
 import { useQuickAdd } from '../hooks/useQuickAdd'
 import { TaskForm } from '../features/tasks/TaskForm'
@@ -34,14 +36,6 @@ const sidebarCollections = [
   { to: '/collections/contests', label: 'Yarışmalar', icon: Camera },
   { to: '/collections/ideas', label: 'Fikirler', icon: Lightbulb },
 ] as const
-
-const createOptions = [
-  { id: 'task' as const, label: 'Görev', icon: CheckSquare },
-  { id: 'birthday' as const, label: 'Doğum günü', icon: Cake },
-  { id: 'contest' as const, label: 'Yarışma', icon: Camera },
-  { id: 'book' as const, label: 'Kitap', icon: BookOpen },
-  { id: 'idea' as const, label: 'Fikir', icon: Lightbulb },
-]
 
 const createTitles = {
   task: 'Görev ekle',
@@ -80,7 +74,7 @@ export function AppShell() {
                     className={({ isActive }) =>
                       cn(
                         'flex touch-target items-center gap-3 rounded-[12px] px-3 text-[14px]',
-                        isActive ? 'text-accent' : 'text-secondary hover:text-text',
+                        isActive ? 'bg-soft-blue font-medium text-accent' : 'text-secondary',
                       )
                     }
                   >
@@ -102,7 +96,7 @@ export function AppShell() {
                       className={({ isActive }) =>
                         cn(
                           'flex touch-target items-center gap-3 rounded-[12px] px-3 text-[14px]',
-                          isActive ? 'text-accent' : 'text-secondary hover:text-text',
+                          isActive ? 'bg-soft-blue font-medium text-accent' : 'text-secondary',
                         )
                       }
                     >
@@ -119,7 +113,7 @@ export function AppShell() {
                 className={({ isActive }) =>
                   cn(
                     'flex touch-target items-center gap-3 rounded-[12px] px-3 text-[14px]',
-                    isActive ? 'text-accent' : 'text-secondary hover:text-text',
+                    isActive ? 'bg-soft-blue font-medium text-accent' : 'text-secondary',
                   )
                 }
               >
@@ -130,8 +124,8 @@ export function AppShell() {
           </nav>
         </aside>
 
-        <main className="relative flex-1 pb-28 lg:pb-8">
-          <div className="mx-auto w-full max-w-[1120px] px-4 pt-6 lg:px-8 lg:pt-8">
+        <main className="relative flex-1 pb-28 lg:pb-10">
+          <div className="mx-auto w-full max-w-[1040px] px-4 pt-5 lg:px-8 lg:pt-8">
             <Outlet />
           </div>
         </main>
@@ -143,21 +137,21 @@ export function AppShell() {
         type="button"
         aria-label="Ekle"
         onClick={openPicker}
-        className="fixed right-4 bottom-[calc(64px+env(safe-area-inset-bottom,0px))] z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-fg shadow-soft lg:hidden"
+        className="fixed right-4 bottom-[calc(72px+env(safe-area-inset-bottom,0px))] z-40 flex size-14 items-center justify-center rounded-full bg-accent text-white shadow-fab lg:hidden"
       >
         <Plus size={22} />
       </button>
 
       <BottomSheet open={pickerOpen} onClose={closePicker} title="Ekle">
         <ul className="space-y-1">
-          {createOptions.map((opt) => (
+          {quickAddOptions.map((opt) => (
             <li key={opt.id}>
               <button
                 type="button"
-                className="flex touch-target w-full items-center gap-3 rounded-[12px] px-2 text-left text-[15px]"
+                className="flex min-h-11 w-full items-center gap-3 rounded-[12px] px-1 text-left text-[15px]"
                 onClick={() => openCreate(opt.id)}
               >
-                <opt.icon size={18} className="text-secondary" />
+                <IconTile icon={opt.icon} bg={opt.bg} fg={opt.fg} size="sm" />
                 {opt.label}
               </button>
             </li>

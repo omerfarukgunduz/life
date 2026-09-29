@@ -11,10 +11,8 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 }
 
 const variantClass: Record<Variant, string> = {
-  primary:
-    'bg-[#171717] text-white dark:bg-[#F5F5F5] dark:text-[#171717]',
-  secondary:
-    'bg-surface text-text border border-border',
+  primary: 'bg-accent text-white',
+  secondary: 'bg-surface text-text border border-border',
   ghost: 'bg-transparent text-text',
   danger: 'bg-transparent text-red-600 dark:text-red-400',
 }

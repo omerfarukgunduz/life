@@ -1,54 +1,85 @@
+import { useQuery } from '@tanstack/react-query'
+import { ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { BookOpen, Cake, Camera, ChevronRight, Lightbulb } from 'lucide-react'
-import { PageHeader } from '../../components/PageHeader'
+import { IconTile, PageHeader } from '../../components'
+import { birthdaysApi, booksApi, contestsApi, ideasApi } from '../../services/endpoints'
+import { collectionIcons } from '../../utils/collectionIcons'
 
 const links = [
   {
     to: '/collections/books',
     title: 'Kitaplar',
-    description: 'Okuma listesi ve notlar',
-    icon: BookOpen,
+    description: 'Okuma listesi',
+    unit: 'kitap',
+    key: 'books',
+    ...collectionIcons.books,
   },
   {
     to: '/collections/birthdays',
     title: 'Doğum Günleri',
     description: 'Yaklaşan kutlamalar',
-    icon: Cake,
+    unit: 'kişi',
+    key: 'birthdays',
+    ...collectionIcons.birthdays,
   },
   {
     to: '/collections/contests',
     title: 'Fotoğraf Yarışmaları',
     description: 'Son başvuru tarihleri',
-    icon: Camera,
+    unit: 'yarışma',
+    key: 'contests',
+    ...collectionIcons.contests,
   },
   {
     to: '/collections/ideas',
     title: 'Fikirler',
-    description: 'Hızlı notlar',
-    icon: Lightbulb,
+    description: 'Kısa notlar',
+    unit: 'fikir',
+    key: 'ideas',
+    ...collectionIcons.ideas,
   },
-]
+] as const
 
 export default function CollectionsPage() {
+  const books = useQuery({ queryKey: ['books', 'count'], queryFn: () => booksApi.list() })
+  const birthdays = useQuery({
+    queryKey: ['birthdays', 'count'],
+    queryFn: () => birthdaysApi.list('all'),
+  })
+  const contests = useQuery({ queryKey: ['contests', 'count'], queryFn: () => contestsApi.list() })
+  const ideas = useQuery({ queryKey: ['ideas', 'count'], queryFn: () => ideasApi.list() })
+
+  const counts: Record<(typeof links)[number]['key'], number | undefined> = {
+    books: books.data?.length,
+    birthdays: birthdays.data?.length,
+    contests: contests.data?.length,
+    ideas: ideas.data?.length,
+  }
+
   return (
     <section>
       <PageHeader title="Koleksiyonlar" />
-      <ul>
-        {links.map((link) => (
-          <li key={link.to}>
-            <Link
-              to={link.to}
-              className="flex min-h-11 items-center gap-3 border-b border-border py-3 last:border-b-0"
-            >
-              <link.icon size={18} strokeWidth={1.75} className="shrink-0 text-secondary" />
-              <div className="min-w-0 flex-1">
-                <p className="text-[15px] font-medium text-text">{link.title}</p>
-                <p className="text-[13px] text-secondary">{link.description}</p>
-              </div>
-              <ChevronRight size={18} strokeWidth={1.75} className="text-secondary" aria-hidden />
-            </Link>
-          </li>
-        ))}
+      <ul className="space-y-3">
+        {links.map((item) => {
+          const count = counts[item.key]
+          return (
+            <li key={item.to}>
+              <Link to={item.to} className="surface flex items-center gap-3 p-4">
+                <IconTile icon={item.icon} bg={item.bg} fg={item.fg} size="lg" />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[16px] font-semibold text-text">{item.title}</span>
+                  <span className="mt-0.5 block text-[13px] text-secondary">{item.description}</span>
+                  {count != null ? (
+                    <span className="mt-2 block text-[12px] text-secondary">
+                      {count} {item.unit}
+                    </span>
+                  ) : null}
+                </span>
+                <ChevronRight size={18} className="shrink-0 text-[#C8C8C6]" />
+              </Link>
+            </li>
+          )
+        })}
       </ul>
     </section>
   )

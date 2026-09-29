@@ -25,7 +25,7 @@ export function SegmentControl({
       role="group"
       aria-label={ariaLabel}
       className={cn(
-        'inline-flex w-full rounded-[12px] border border-border bg-surface p-1',
+        'inline-flex w-full rounded-[14px] bg-[#F1F1EF] p-1 dark:bg-[#2C2C2E]',
         className,
       )}
     >
@@ -37,9 +37,9 @@ export function SegmentControl({
             type="button"
             onClick={() => onChange(item.id)}
             className={cn(
-              'min-h-10 flex-1 rounded-[10px] px-3 text-sm font-medium',
+              'min-h-10 flex-1 rounded-[11px] px-2 text-[13px] font-medium',
               active
-                ? 'bg-[#171717] text-white dark:bg-[#F5F5F5] dark:text-[#171717]'
+                ? 'bg-soft-blue text-accent dark:bg-[#3A3A3C] dark:text-text'
                 : 'text-secondary',
             )}
           >

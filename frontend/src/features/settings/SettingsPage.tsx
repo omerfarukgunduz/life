@@ -1,22 +1,38 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useRef, useState } from 'react'
-import { Button, Dialog, PageHeader, SegmentControl } from '../../components'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { Button, Checkbox, Dialog, Input, PageHeader, ThemeToggle } from '../../components'
+import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { useInstallPrompt } from '../../hooks/useInstallPrompt'
-import { useTheme } from '../../hooks/useTheme'
 import { ApiError } from '../../services/api'
-import { dataApi, pushApi, settingsApi } from '../../services/endpoints'
-import type { ExportData, ThemeMode, UserSettings } from '../../types'
+import { authApi, dataApi, pushApi, settingsApi } from '../../services/endpoints'
+import type { ExportData, UserSettings } from '../../types'
 import { getTimeZone, urlBase64ToUint8Array } from '../../utils'
 
-const themeItems: { id: ThemeMode; label: string }[] = [
-  { id: 'system', label: 'Sistem' },
-  { id: 'light', label: 'Açık' },
-  { id: 'dark', label: 'Koyu' },
-]
+const emailSchema = z.object({
+  newEmail: z.string().email('Geçerli bir e-posta girin'),
+  currentPassword: z.string().min(1, 'Mevcut parola gerekli'),
+})
+
+const passwordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Mevcut parola gerekli'),
+    newPassword: z.string().min(8, 'En az 8 karakter'),
+    confirmPassword: z.string().min(1, 'Parolayı tekrar girin'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Parolalar eşleşmiyor',
+    path: ['confirmPassword'],
+  })
+
+type EmailFormValues = z.infer<typeof emailSchema>
+type PasswordFormValues = z.infer<typeof passwordSchema>
 
 export default function SettingsPage() {
-  const { preference, setPreference } = useTheme()
+  const { user, refresh } = useAuth()
   const { canInstall, promptInstall, isInstalled } = useInstallPrompt()
   const { toast } = useToast()
   const qc = useQueryClient()
@@ -30,6 +46,16 @@ export default function SettingsPage() {
     queryFn: () => settingsApi.get(),
   })
 
+  const emailForm = useForm<EmailFormValues>({
+    resolver: zodResolver(emailSchema),
+    defaultValues: { newEmail: user?.email ?? '', currentPassword: '' },
+  })
+
+  const passwordForm = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: { currentPassword: '', newPassword: '', confirmPassword: '' },
+  })
+
   const updateSettings = useMutation({
     mutationFn: (next: UserSettings) => settingsApi.update(next),
     onSuccess: (saved) => {
@@ -38,6 +64,31 @@ export default function SettingsPage() {
     },
     onError: (err: unknown) => {
       toast(err instanceof ApiError ? err.message : 'Ayarlar kaydedilemedi')
+    },
+  })
+
+  const changeEmail = useMutation({
+    mutationFn: (values: EmailFormValues) =>
+      authApi.changeEmail(values.newEmail, values.currentPassword),
+    onSuccess: async (_data, variables) => {
+      await refresh()
+      emailForm.reset({ newEmail: variables.newEmail, currentPassword: '' })
+      toast('E-posta güncellendi')
+    },
+    onError: (err: unknown) => {
+      toast(err instanceof ApiError ? err.message : 'E-posta güncellenemedi')
+    },
+  })
+
+  const changePassword = useMutation({
+    mutationFn: (values: PasswordFormValues) =>
+      authApi.changePassword(values.currentPassword, values.newPassword),
+    onSuccess: () => {
+      passwordForm.reset()
+      toast('Parola güncellendi')
+    },
+    onError: (err: unknown) => {
+      toast(err instanceof ApiError ? err.message : 'Parola güncellenemedi')
     },
   })
 
@@ -147,17 +198,76 @@ export default function SettingsPage() {
     <section className="space-y-8">
       <PageHeader title="Ayarlar" />
 
-      <section className="space-y-3">
-        <h2 className="text-[15px] font-semibold text-text">Görünüm</h2>
-        <SegmentControl
-          ariaLabel="Tema"
-          items={themeItems}
-          value={preference}
-          onChange={(id) => setPreference(id as ThemeMode)}
-        />
+      <section className="surface space-y-4 p-4">
+        <h2 className="text-[15px] font-semibold text-text">Hesap</h2>
+        <p className="text-[13px] text-secondary">
+          Mevcut e-posta: <span className="text-text">{user?.email ?? '—'}</span>
+        </p>
+
+        <form
+          className="space-y-3 border-t border-divider pt-4"
+          onSubmit={emailForm.handleSubmit((values) => changeEmail.mutate(values))}
+          noValidate
+        >
+          <p className="text-[14px] font-medium text-text">E-posta değiştir</p>
+          <Input
+            label="Yeni e-posta"
+            type="email"
+            autoComplete="email"
+            error={emailForm.formState.errors.newEmail?.message}
+            {...emailForm.register('newEmail')}
+          />
+          <Input
+            label="Mevcut parola"
+            type="password"
+            autoComplete="current-password"
+            error={emailForm.formState.errors.currentPassword?.message}
+            {...emailForm.register('currentPassword')}
+          />
+          <Button type="submit" variant="secondary" disabled={changeEmail.isPending}>
+            E-postayı kaydet
+          </Button>
+        </form>
+
+        <form
+          className="space-y-3 border-t border-divider pt-4"
+          onSubmit={passwordForm.handleSubmit((values) => changePassword.mutate(values))}
+          noValidate
+        >
+          <p className="text-[14px] font-medium text-text">Parola değiştir</p>
+          <Input
+            label="Mevcut parola"
+            type="password"
+            autoComplete="current-password"
+            error={passwordForm.formState.errors.currentPassword?.message}
+            {...passwordForm.register('currentPassword')}
+          />
+          <Input
+            label="Yeni parola"
+            type="password"
+            autoComplete="new-password"
+            error={passwordForm.formState.errors.newPassword?.message}
+            {...passwordForm.register('newPassword')}
+          />
+          <Input
+            label="Yeni parola (tekrar)"
+            type="password"
+            autoComplete="new-password"
+            error={passwordForm.formState.errors.confirmPassword?.message}
+            {...passwordForm.register('confirmPassword')}
+          />
+          <Button type="submit" variant="secondary" disabled={changePassword.isPending}>
+            Parolayı kaydet
+          </Button>
+        </form>
       </section>
 
-      <section className="space-y-3">
+      <section className="surface space-y-3 p-4">
+        <h2 className="text-[15px] font-semibold text-text">Görünüm</h2>
+        <ThemeToggle />
+      </section>
+
+      <section className="surface space-y-3 p-4">
         <h2 className="text-[15px] font-semibold text-text">Bildirimler</h2>
         <Button
           variant="secondary"
@@ -166,7 +276,7 @@ export default function SettingsPage() {
         >
           Bildirimlere izin ver
         </Button>
-        <ul className="divide-y divide-border rounded-[12px] border border-border">
+        <ul className="divide-y divide-divider">
           {(
             [
               ['notifyTasks', 'Görevler'] as const,
@@ -174,14 +284,13 @@ export default function SettingsPage() {
               ['notifyContests', 'Yarışmalar'] as const,
             ] as const
           ).map(([key, label]) => (
-            <li key={key} className="flex items-center justify-between gap-3 px-3 py-3">
+            <li key={key} className="flex items-center justify-between gap-3 py-2">
               <span className="text-[15px] text-text">{label}</span>
-              <input
-                type="checkbox"
-                className="size-5 accent-[var(--accent)]"
+              <Checkbox
                 checked={settings?.[key] ?? true}
-                onChange={(e) => patch({ [key]: e.target.checked })}
+                onChange={(checked) => patch({ [key]: checked })}
                 aria-label={label}
+                className="!min-h-0 !min-w-0"
               />
             </li>
           ))}
@@ -191,7 +300,7 @@ export default function SettingsPage() {
         </p>
       </section>
 
-      <section className="space-y-3">
+      <section className="surface space-y-3 p-4">
         <h2 className="text-[15px] font-semibold text-text">PWA</h2>
         {isInstalled ? (
           <p className="text-[14px] text-secondary">Yüklü</p>
@@ -209,7 +318,7 @@ export default function SettingsPage() {
         )}
       </section>
 
-      <section className="space-y-3">
+      <section className="surface space-y-3 p-4">
         <h2 className="text-[15px] font-semibold text-text">Veri</h2>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button variant="secondary" onClick={() => void exportData()}>

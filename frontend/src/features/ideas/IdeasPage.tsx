@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { Lightbulb } from 'lucide-react'
 import {
   BottomSheet,
   Button,
   Dialog,
   EmptyState,
+  IconTile,
   PageHeader,
 } from '../../components'
 import { DesktopAddButton } from '../../layouts/AppShell'
@@ -60,15 +62,17 @@ export default function IdeasPage() {
         />
       ) : null}
 
-      <ul>
+      {data.length > 0 ? (
+      <ul className="surface divide-y divide-divider px-4">
         {data.map((idea) => (
           <li key={idea.id}>
             <button
               type="button"
-              className="flex w-full min-h-11 items-center justify-between gap-3 border-b border-border py-3 text-left last:border-b-0"
+              className="flex w-full min-h-11 items-center gap-3 py-3 text-left"
               onClick={() => setEditing(idea)}
             >
-              <p className="min-w-0 truncate text-[15px] font-medium text-text">
+              <IconTile icon={Lightbulb} bg="bg-soft-yellow" fg="text-[#C48A2A]" size="sm" />
+              <p className="min-w-0 flex-1 truncate text-[15px] font-medium text-text">
                 {idea.title}
               </p>
               <time className="shrink-0 text-[13px] text-secondary" dateTime={idea.createdAt}>
@@ -78,6 +82,7 @@ export default function IdeasPage() {
           </li>
         ))}
       </ul>
+      ) : null}
 
       <BottomSheet
         open={editing !== null}

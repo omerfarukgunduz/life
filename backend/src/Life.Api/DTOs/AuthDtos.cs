@@ -4,3 +4,5 @@ public record LoginRequest(string Email, string Password);
 public record RegisterRequest(string Email, string Password);
 public record AuthResponse(string Token, string Email, Guid UserId);
 public record MeResponse(Guid Id, string Email, DateTime CreatedAt);
+public record ChangeEmailRequest(string NewEmail, string CurrentPassword);
+public record ChangePasswordRequest(string CurrentPassword, string NewPassword);

@@ -22,6 +22,18 @@ export function formatDayMonthLong(date: string | Date): string {
   }).format(d)
 }
 
+export function formatWeekdayShort(date: string | Date): string {
+  const d = typeof date === 'string' ? parseDateOnly(date) : date
+  return new Intl.DateTimeFormat('tr-TR', { weekday: 'short' })
+    .format(d)
+    .replace(/\.$/, '')
+}
+
+export function formatClock(value: string | null | undefined): string | null {
+  if (!value) return null
+  return value.slice(0, 5)
+}
+
 export function formatWeekday(date: string | Date): string {
   const d = typeof date === 'string' ? parseDateOnly(date) : date
   return new Intl.DateTimeFormat('tr-TR', { weekday: 'long' }).format(d)

@@ -5,7 +5,7 @@ export type TaskFilter = 'today' | 'upcoming' | 'all' | 'completed'
 export type BirthdayFilter = 'month' | 'upcoming' | 'all'
 export type CalendarItemType = 'task' | 'birthday' | 'contest'
 export type UpcomingType = 'task' | 'birthday' | 'contest'
-export type ThemeMode = 'system' | 'light' | 'dark'
+export type ThemeMode = 'light' | 'dark'
 
 export interface AuthResponse {
   token: string

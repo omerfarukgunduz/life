@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { Gift } from 'lucide-react'
 import {
   BottomSheet,
   Button,
   Dialog,
   EmptyState,
+  IconTile,
   PageHeader,
   SegmentControl,
 } from '../../components'
@@ -87,7 +89,8 @@ export default function BirthdaysPage() {
         />
       ) : null}
 
-      <ul>
+      {data.length > 0 ? (
+      <ul className="surface divide-y divide-divider px-4">
         {data.map((item) => {
           const next = nextBirthdayDate(item.birthMonth, item.birthDay)
           const nextKey = toDateOnly(next)
@@ -100,10 +103,11 @@ export default function BirthdaysPage() {
             <li key={item.id}>
               <button
                 type="button"
-                className="flex w-full min-h-11 items-center gap-3 border-b border-border py-3 text-left last:border-b-0"
+                className="flex w-full min-h-11 items-center gap-3 py-3 text-left"
                 onClick={() => setEditing(item)}
               >
-                <span className="w-14 shrink-0 text-[13px] text-secondary">
+                <IconTile icon={Gift} bg="bg-soft-pink" fg="text-[#D4536A]" size="sm" />
+                <span className="w-12 shrink-0 text-[13px] font-medium text-text">
                   {formatDayMonth(nextKey)}
                 </span>
                 <div className="min-w-0 flex-1">
@@ -120,6 +124,7 @@ export default function BirthdaysPage() {
           )
         })}
       </ul>
+      ) : null}
 
       <BottomSheet
         open={editing !== null}
