@@ -42,10 +42,10 @@ public static class DevSeed
         db.Tasks.AddRange(task1, task2); db.Birthdays.Add(birthday); db.Contests.Add(contest);
         db.Books.Add(book); db.Ideas.Add(idea);
         await db.SaveChangesAsync();
-        await reminderService.RefreshTaskRemindersAsync(task1, settings.TimeZone);
-        await reminderService.RefreshTaskRemindersAsync(task2, settings.TimeZone);
-        await reminderService.RefreshBirthdayRemindersAsync(birthday, settings.TimeZone);
-        await reminderService.RefreshContestRemindersAsync(contest, settings.TimeZone);
+        await reminderService.RefreshTaskRemindersAsync(task1, settings.TimeZone, settings.ReminderTime);
+        await reminderService.RefreshTaskRemindersAsync(task2, settings.TimeZone, settings.ReminderTime);
+        await reminderService.RefreshBirthdayRemindersAsync(birthday, settings.TimeZone, settings.ReminderTime);
+        await reminderService.RefreshContestRemindersAsync(contest, settings.TimeZone, settings.ReminderTime);
         await db.SaveChangesAsync();
     }
 }

@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Navigate } from 'react-router-dom'
-import { Button, Input } from '../../components'
+import { Button, Input, TextButton } from '../../components'
 import { useAuth } from '../../hooks/useAuth'
 import { ApiError } from '../../services/api'
 
@@ -53,10 +53,10 @@ export function AuthPage() {
   })
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-bg px-4">
-      <div className="w-full max-w-sm">
-        <p className="mb-8 text-center text-[20px] font-semibold tracking-tight">Life</p>
-        <h1 className="mb-6 text-[22px] font-semibold">
+    <div className="flex min-h-dvh items-center justify-center bg-bg px-5 py-10">
+      <div className="w-full max-w-[360px]">
+        <p className="footnote mb-2 font-semibold text-secondary">Life</p>
+        <h1 className="large-title mb-6 text-text">
           {mode === 'login' ? 'Giriş yap' : 'Kayıt ol'}
         </h1>
         <form className="flex flex-col gap-4" onSubmit={onSubmit}>
@@ -74,25 +74,24 @@ export function AuthPage() {
             error={errors.password?.message}
             {...reg('password')}
           />
-          {formError ? <p className="text-[13px] text-red-600">{formError}</p> : null}
+          {formError ? <p className="footnote text-danger">{formError}</p> : null}
           {registrationClosed ? (
-            <p className="text-[13px] text-secondary">Kayıt kapalı</p>
+            <p className="footnote text-secondary">Kayıt kapalı</p>
           ) : null}
           <Button type="submit" fullWidth disabled={isSubmitting}>
             {mode === 'login' ? 'Giriş yap' : 'Kayıt ol'}
           </Button>
         </form>
         {!registrationClosed ? (
-          <button
-            type="button"
-            className="mt-4 w-full text-center text-[14px] text-accent"
+          <TextButton
+            className="mt-3 self-start px-0"
             onClick={() => {
               setMode((m) => (m === 'login' ? 'register' : 'login'))
               setFormError(null)
             }}
           >
             {mode === 'login' ? 'Hesap oluştur' : 'Girişe dön'}
-          </button>
+          </TextButton>
         ) : null}
       </div>
     </div>

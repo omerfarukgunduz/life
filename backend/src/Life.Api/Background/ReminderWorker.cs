@@ -61,7 +61,7 @@ public class ReminderWorker : BackgroundService
         {
             case EntityType.Task:
                 var task = await db.Tasks.AsNoTracking().FirstOrDefaultAsync(t => t.Id == reminder.EntityId && t.UserId == reminder.UserId, ct);
-                return ("Görev hatırlatması", task?.Title ?? "Göreviniz var", "/tasks");
+                return ("İş hatırlatması", task?.Title ?? "Yapılacak bir işiniz var", "/tasks");
             case EntityType.Birthday:
                 var birthday = await db.Birthdays.AsNoTracking().FirstOrDefaultAsync(b => b.Id == reminder.EntityId && b.UserId == reminder.UserId, ct);
                 return ("Doğum günü hatırlatması", birthday is null ? "Doğum günü yaklaşıyor" : $"{birthday.Name} doğum günü", "/birthdays");

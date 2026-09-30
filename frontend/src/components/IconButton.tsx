@@ -21,10 +21,8 @@ export function IconButton({
       aria-label={label}
       title={label}
       className={cn(
-        'inline-flex items-center justify-center text-text',
-        variant === 'soft'
-          ? 'size-10 rounded-full border border-border bg-surface text-secondary'
-          : 'size-11 rounded-[12px]',
+        'inline-flex size-11 cursor-pointer items-center justify-center text-accent transition-opacity duration-200 active:opacity-60 disabled:cursor-not-allowed disabled:opacity-40',
+        variant === 'soft' && 'rounded-[var(--radius-control)] bg-surface-secondary text-secondary',
         className,
       )}
       {...props}

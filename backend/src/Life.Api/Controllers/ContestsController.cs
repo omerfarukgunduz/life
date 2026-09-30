@@ -47,7 +47,7 @@ public class ContestsController : ControllerBase
         };
         var settings = await GetSettings(userId, ct);
         _db.Contests.Add(entity);
-        await _reminders.RefreshContestRemindersAsync(entity, settings.TimeZone, ct);
+        await _reminders.RefreshContestRemindersAsync(entity, settings.TimeZone, settings.ReminderTime, ct);
         await _db.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(Get), new { id = entity.Id }, Mappers.ToDto(entity));
     }
@@ -63,7 +63,7 @@ public class ContestsController : ControllerBase
         if (!string.IsNullOrWhiteSpace(request.Status) && Enum.TryParse(request.Status, true, out ContestStatus s)) entity.Status = s;
         entity.ReminderDaysBefore = request.ReminderDaysBefore?.ToList() ?? new List<int>();
         var settings = await GetSettings(userId, ct);
-        await _reminders.RefreshContestRemindersAsync(entity, settings.TimeZone, ct);
+        await _reminders.RefreshContestRemindersAsync(entity, settings.TimeZone, settings.ReminderTime, ct);
         await _db.SaveChangesAsync(ct);
         return Ok(Mappers.ToDto(entity));
     }

@@ -2,17 +2,17 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Search, SlidersHorizontal } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import {
-  Avatar,
   BottomSheet,
   Button,
   Dialog,
   EmptyState,
   IconButton,
+  ListSection,
+  NavAddButton,
   PageHeader,
   SegmentControl,
   TaskRow,
 } from '../../components'
-import { DesktopAddButton } from '../../layouts/AppShell'
 import { useQuickAdd } from '../../hooks/useQuickAdd'
 import { useToast } from '../../context/ToastContext'
 import { tasksApi } from '../../services/endpoints'
@@ -105,7 +105,7 @@ export default function TasksPage() {
       await qc.invalidateQueries({ queryKey: ['tasks'] })
       await qc.invalidateQueries({ queryKey: ['dashboard'] })
       await qc.invalidateQueries({ queryKey: ['calendar'] })
-      toast('Görev silindi')
+      toast('İş silindi')
     },
   })
 
@@ -121,45 +121,39 @@ export default function TasksPage() {
   return (
     <section>
       <PageHeader
-        title="Görevler"
+        title="İşler"
         trailing={
           <>
-            <IconButton
-              label="Ara"
-              variant="soft"
-              onClick={() => setSearchOpen((open) => !open)}
-            >
-              <Search size={18} strokeWidth={1.75} />
+            <IconButton label="Ara" onClick={() => setSearchOpen((open) => !open)}>
+              <Search size={20} strokeWidth={2} />
             </IconButton>
             <IconButton
               label="Filtrele"
-              variant="soft"
               onClick={() => setFilterOpen(true)}
               className="relative"
             >
-              <SlidersHorizontal size={18} strokeWidth={1.75} />
+              <SlidersHorizontal size={20} strokeWidth={2} />
               {priority !== 'all' ? (
-                <span className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-accent" />
+                <span className="absolute top-2.5 right-2.5 size-1.5 rounded-full bg-accent" />
               ) : null}
             </IconButton>
-            <Avatar />
+            <NavAddButton onClick={() => openCreate('task')} label="İş ekle" />
           </>
         }
-        action={<DesktopAddButton onClick={() => openCreate('task')} label="Görev ekle" />}
       />
 
       {searchOpen ? (
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Görev ara"
-          aria-label="Görev ara"
-          className="mb-4 min-h-11 w-full rounded-[12px] border border-border bg-surface px-3 text-base text-text placeholder:text-secondary"
+          placeholder="İş ara"
+          aria-label="İş ara"
+          className="mb-4 min-h-11 w-full rounded-[var(--radius-input)] border border-border bg-surface px-3 text-[17px] text-text placeholder:text-secondary"
         />
       ) : null}
 
       <SegmentControl
-        ariaLabel="Görev filtresi"
+        ariaLabel="İş filtresi"
         className="mb-4"
         items={filters}
         value={filter}
@@ -176,24 +170,28 @@ export default function TasksPage() {
 
       {!isLoading && visible.length === 0 ? (
         <EmptyState
-          message="Görev yok."
-          actionLabel="Görev ekle"
+          message="Yapılacak iş yok."
+          actionLabel="İş ekle"
           onAction={() => openCreate('task')}
         />
       ) : null}
 
-      <ul className="divide-y divide-divider">
-        {visible.map((task) => (
-          <li key={task.id}>
-            <TaskRow
-              task={task}
-              showDate
-              onToggle={() => toggle.mutate(task)}
-              onOpen={() => setEditing(task)}
-            />
-          </li>
-        ))}
-      </ul>
+      {visible.length > 0 ? (
+        <ListSection>
+          <ul>
+            {visible.map((task) => (
+              <li key={task.id}>
+                <TaskRow
+                  task={task}
+                  showDate
+                  onToggle={() => toggle.mutate(task)}
+                  onOpen={() => setEditing(task)}
+                />
+              </li>
+            ))}
+          </ul>
+        </ListSection>
+      ) : null}
 
       <BottomSheet open={filterOpen} onClose={() => setFilterOpen(false)} title="Öncelik">
         <ul className="space-y-1">
@@ -201,7 +199,7 @@ export default function TasksPage() {
             <li key={item.id}>
               <button
                 type="button"
-                className="flex min-h-11 w-full items-center justify-between rounded-[12px] px-2 text-left text-[15px]"
+                className="flex min-h-11 w-full items-center px-4 text-left text-[17px]"
                 onClick={() => {
                   setPriority(item.id)
                   setFilterOpen(false)
@@ -219,7 +217,7 @@ export default function TasksPage() {
       <BottomSheet
         open={editing !== null}
         onClose={() => setEditing(null)}
-        title="Görevi düzenle"
+        title="İşi düzenle"
       >
         {editing ? (
           <div className="space-y-4">
@@ -242,7 +240,7 @@ export default function TasksPage() {
         open={deleting !== null}
         onClose={() => setDeleting(null)}
         onConfirm={() => deleting && remove.mutate(deleting.id)}
-        title="Görevi sil?"
+        title="İşi sil?"
         description="Bu işlem geri alınamaz."
         confirmLabel="Sil"
         danger

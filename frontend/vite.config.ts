@@ -17,7 +17,7 @@ export default defineConfig({
         name: 'Life',
         short_name: 'Life',
         description:
-          'Görevler, doğum günleri, kitaplar ve fikirler için sakin bir kişisel takip uygulaması.',
+          'Yapılacak işler, doğum günleri, kitaplar ve fikirler için sakin bir kişisel takip uygulaması.',
         start_url: '/',
         display: 'standalone',
         background_color: '#F7F7F5',

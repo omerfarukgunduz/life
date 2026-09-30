@@ -23,7 +23,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className="flex w-full flex-col gap-1.5">
         {label ? (
-          <label htmlFor={inputId} className="text-sm font-medium text-text">
+          <label htmlFor={inputId} className="subheadline font-medium text-text">
             {label}
           </label>
         ) : null}
@@ -31,7 +31,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            'min-h-11 w-full appearance-none rounded-[12px] border border-border bg-surface px-3 text-base text-text focus:border-accent',
+            'min-h-11 w-full appearance-none rounded-[var(--radius-input)] border border-border bg-surface px-3 text-[17px] text-text transition-[border-color,box-shadow] duration-200 focus:border-accent focus:shadow-[0_0_0_3px_rgba(0,122,255,0.12)]',
             error && 'border-red-500',
             className,
           )}

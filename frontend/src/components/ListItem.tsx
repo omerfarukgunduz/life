@@ -57,7 +57,7 @@ export function ListItem({
         type="button"
         onClick={onClick}
         className={cn(
-          'flex w-full min-h-11 items-center gap-3 border-b border-border px-1 py-3 text-left last:border-b-0',
+        'flex w-full min-h-14 items-center gap-3 px-4 py-2.5 text-left last:border-b-0',
           muted && 'opacity-50',
           className,
         )}
@@ -70,7 +70,7 @@ export function ListItem({
   return (
     <div
       className={cn(
-        'flex min-h-11 items-center gap-3 border-b border-border px-1 py-3 last:border-b-0',
+        'flex min-h-14 items-center gap-3 px-4 py-2.5 last:border-b-0',
         muted && 'opacity-50',
         className,
       )}

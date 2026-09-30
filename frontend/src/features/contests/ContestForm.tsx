@@ -97,6 +97,7 @@ export function ContestForm({ initial, onDone }: ContestFormProps) {
         label="Son başvuru"
         mode="date"
         error={errors.deadline?.message}
+        defaultValue={initial?.deadline ?? ''}
         {...register('deadline')}
       />
       <Input label="Bağlantı" type="url" placeholder="https://" {...register('url')} />

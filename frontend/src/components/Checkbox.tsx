@@ -22,12 +22,13 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       <label
         htmlFor={inputId}
         className={cn(
-          'inline-flex min-h-11 cursor-pointer items-center gap-3',
+          'inline-flex cursor-pointer items-center gap-3',
+          label ? 'min-h-11' : 'size-[22px] justify-center',
           disabled && 'opacity-40',
           className,
         )}
       >
-        <span className="relative inline-flex size-6 shrink-0 items-center justify-center">
+        <span className="relative inline-flex size-[22px] shrink-0 items-center justify-center">
           <input
             ref={ref}
             id={inputId}
@@ -40,16 +41,20 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           />
           <span
             className={cn(
-              'flex size-[22px] items-center justify-center rounded-full border border-[#D4D4D2] bg-surface',
+              'flex size-[22px] items-center justify-center rounded-full border border-border bg-surface',
               'peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent',
-              checked && 'border-accent bg-accent text-white',
+              'peer-checked:border-accent peer-checked:bg-accent peer-checked:text-white',
             )}
             aria-hidden
           >
-            {checked ? <Check size={14} strokeWidth={2.5} /> : null}
+            <Check
+              size={13}
+              strokeWidth={2.5}
+              className={cn('shrink-0', !checked && 'hidden')}
+            />
           </span>
         </span>
-        {label ? <span className="text-[15px] text-text">{label}</span> : null}
+        {label ? <span className="text-[17px] text-text">{label}</span> : null}
       </label>
     )
   },

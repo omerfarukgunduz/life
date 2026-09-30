@@ -16,14 +16,14 @@ export function BookCover({ title, author }: { title: string; author: string }) 
   const tone = toneFor(title)
   return (
     <span
-      className="flex h-[68px] w-[46px] shrink-0 flex-col justify-end rounded-[8px] p-1.5"
+      className="flex h-11 w-[30px] shrink-0 flex-col justify-end overflow-hidden rounded-[6px] p-1"
       style={{ backgroundColor: tone.bg, color: tone.fg }}
       aria-hidden
     >
-      <span className="line-clamp-3 text-[8px] font-semibold leading-tight tracking-tight">
+      <span className="line-clamp-3 text-[7px] font-semibold leading-[1.15] tracking-tight">
         {title}
       </span>
-      <span className="mt-1 truncate text-[7px] opacity-70">{author}</span>
+      <span className="mt-0.5 truncate text-[6px] opacity-70">{author}</span>
     </span>
   )
 }

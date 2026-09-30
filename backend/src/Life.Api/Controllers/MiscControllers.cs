@@ -56,18 +56,40 @@ public class RemindersController : ControllerBase
 public class SettingsController : ControllerBase
 {
     private readonly LifeDbContext _db;
-    public SettingsController(LifeDbContext db) => _db = db;
+    private readonly ReminderService _reminders;
+    public SettingsController(LifeDbContext db, ReminderService reminders)
+    {
+        _db = db;
+        _reminders = reminders;
+    }
 
     [HttpGet]
     public async Task<ActionResult<SettingsDto>> Get(CancellationToken ct)
     {
         var settings = await _db.UserSettings.AsNoTracking().FirstOrDefaultAsync(s => s.UserId == User.GetUserId(), ct);
-        return Ok(settings is null ? new SettingsDto(TimeZoneHelper.DefaultTimeZone, true, true, true) : Mappers.ToDto(settings));
+        return Ok(settings is null
+            ? new SettingsDto(
+                TimeZoneHelper.DefaultTimeZone,
+                true,
+                true,
+                true,
+                TimeZoneHelper.FormatTime(ReminderService.DefaultReminderTime))
+            : Mappers.ToDto(settings));
     }
 
     [HttpPut]
     public async Task<ActionResult<SettingsDto>> Put([FromBody] UpdateSettingsRequest request, CancellationToken ct)
     {
+        if (!TimeZoneHelper.TryParseTime(request.ReminderTime, out var reminderTime))
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = 400,
+                Title = "Geçersiz saat",
+                Detail = "Bildirim saati HH:mm formatında olmalıdır.",
+            });
+        }
+
         var userId = User.GetUserId();
         var settings = await _db.UserSettings.FirstOrDefaultAsync(s => s.UserId == userId, ct);
         if (settings is null)
@@ -75,11 +97,18 @@ public class SettingsController : ControllerBase
             settings = new Entities.UserSettings { UserId = userId };
             _db.UserSettings.Add(settings);
         }
+
+        var reminderTimeChanged = settings.ReminderTime != reminderTime;
         settings.TimeZone = request.TimeZone.Trim();
         settings.NotifyTasks = request.NotifyTasks;
         settings.NotifyBirthdays = request.NotifyBirthdays;
         settings.NotifyContests = request.NotifyContests;
+        settings.ReminderTime = reminderTime;
         await _db.SaveChangesAsync(ct);
+
+        if (reminderTimeChanged)
+            await _reminders.ResyncAllRemindersForUserAsync(userId, ct);
+
         return Ok(Mappers.ToDto(settings));
     }
 }

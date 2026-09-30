@@ -55,7 +55,7 @@ public class BirthdaysController : ControllerBase
             ReminderDaysBefore = request.ReminderDaysBefore?.ToList() ?? new List<int>(), CreatedAt = DateTime.UtcNow
         };
         _db.Birthdays.Add(entity);
-        await _reminders.RefreshBirthdayRemindersAsync(entity, settings.TimeZone, ct);
+        await _reminders.RefreshBirthdayRemindersAsync(entity, settings.TimeZone, settings.ReminderTime, ct);
         await _db.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(Get), new { id = entity.Id }, Mappers.ToDto(entity));
     }
@@ -70,7 +70,7 @@ public class BirthdaysController : ControllerBase
         entity.BirthYear = request.BirthYear; entity.Note = request.Note;
         entity.ReminderDaysBefore = request.ReminderDaysBefore?.ToList() ?? new List<int>();
         var settings = await GetSettings(userId, ct);
-        await _reminders.RefreshBirthdayRemindersAsync(entity, settings.TimeZone, ct);
+        await _reminders.RefreshBirthdayRemindersAsync(entity, settings.TimeZone, settings.ReminderTime, ct);
         await _db.SaveChangesAsync(ct);
         return Ok(Mappers.ToDto(entity));
     }

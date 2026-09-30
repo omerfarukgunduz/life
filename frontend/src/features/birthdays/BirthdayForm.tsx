@@ -1,13 +1,15 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Button, Input, Textarea } from '../../components'
+import { Button, Input, Select, Textarea } from '../../components'
 import { useToast } from '../../context/ToastContext'
 import { ApiError } from '../../services/api'
 import { birthdaysApi } from '../../services/endpoints'
 import type { Birthday } from '../../types'
 import { cn } from '../../utils'
+import { daysInMonth, monthSelectOptions } from '../../utils/turkishMonths'
 
 const REMINDERS = [
   { value: 0, label: 'Aynı gün' },
@@ -54,7 +56,24 @@ export function BirthdayForm({ initial, onDone }: BirthdayFormProps) {
     },
   })
 
+  const birthMonth = watch('birthMonth')
+  const birthYear = watch('birthYear')
   const selected = watch('reminderDaysBefore')
+
+  const monthOptions = monthSelectOptions()
+  const yearNum = birthYear ? Number(birthYear) : undefined
+  const maxDay = daysInMonth(Number(birthMonth) || 1, yearNum)
+  const dayOptions = Array.from({ length: maxDay }, (_, i) => ({
+    value: String(i + 1),
+    label: String(i + 1),
+  }))
+
+  const birthDay = watch('birthDay')
+  useEffect(() => {
+    if (Number(birthDay) > maxDay) {
+      setValue('birthDay', maxDay, { shouldValidate: true })
+    }
+  }, [birthDay, maxDay, setValue])
 
   const toggleReminder = (day: number) => {
     const next = selected.includes(day)
@@ -95,8 +114,18 @@ export function BirthdayForm({ initial, onDone }: BirthdayFormProps) {
     >
       <Input label="İsim" error={errors.name?.message} {...register('name')} />
       <div className="grid grid-cols-3 gap-3">
-        <Input label="Gün" type="number" min={1} max={31} {...register('birthDay')} />
-        <Input label="Ay" type="number" min={1} max={12} {...register('birthMonth')} />
+        <Select
+          label="Gün"
+          options={dayOptions}
+          error={errors.birthDay?.message}
+          {...register('birthDay')}
+        />
+        <Select
+          label="Ay"
+          options={monthOptions}
+          error={errors.birthMonth?.message}
+          {...register('birthMonth')}
+        />
         <Input label="Yıl (ops.)" type="number" {...register('birthYear')} />
       </div>
       <Textarea label="Not" {...register('note')} />

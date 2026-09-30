@@ -59,7 +59,7 @@ public class TasksController : ControllerBase
             IsCompleted = isCompleted, CreatedAt = DateTime.UtcNow, CompletedAt = isCompleted ? DateTime.UtcNow : null
         };
         _db.Tasks.Add(entity);
-        await _reminders.RefreshTaskRemindersAsync(entity, settings.TimeZone, ct);
+        await _reminders.RefreshTaskRemindersAsync(entity, settings.TimeZone, settings.ReminderTime, ct);
         await _db.SaveChangesAsync(ct);
         return CreatedAtAction(nameof(Get), new { id = entity.Id }, Mappers.ToDto(entity));
     }
@@ -83,7 +83,7 @@ public class TasksController : ControllerBase
             entity.IsCompleted = request.IsCompleted.Value;
         }
         var settings = await GetSettings(userId, ct);
-        await _reminders.RefreshTaskRemindersAsync(entity, settings.TimeZone, ct);
+        await _reminders.RefreshTaskRemindersAsync(entity, settings.TimeZone, settings.ReminderTime, ct);
         await _db.SaveChangesAsync(ct);
         return Ok(Mappers.ToDto(entity));
     }

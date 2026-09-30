@@ -11,15 +11,15 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 }
 
 const variantClass: Record<Variant, string> = {
-  primary: 'bg-accent text-white',
-  secondary: 'bg-surface text-text border border-border',
-  ghost: 'bg-transparent text-text',
-  danger: 'bg-transparent text-red-600 dark:text-red-400',
+  primary: 'bg-accent text-white active:opacity-80',
+  secondary: 'bg-bg text-accent active:opacity-70 dark:bg-surface-secondary',
+  ghost: 'bg-transparent text-accent active:opacity-60',
+  danger: 'bg-transparent text-danger active:opacity-70',
 }
 
 const sizeClass: Record<Size, string> = {
-  md: 'min-h-11 px-4 text-[15px]',
-  sm: 'min-h-11 px-3 text-sm',
+  md: 'min-h-11 px-4 text-[17px] font-semibold',
+  sm: 'min-h-11 px-3 text-[15px] font-medium',
 }
 
 export function Button({
@@ -37,7 +37,7 @@ export function Button({
       type={type}
       disabled={disabled}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-[12px] font-medium transition-opacity disabled:opacity-40',
+        'inline-flex cursor-pointer items-center justify-center gap-2 rounded-[var(--radius-button)] transition-opacity duration-200 disabled:cursor-not-allowed disabled:opacity-40',
         variantClass[variant],
         sizeClass[size],
         fullWidth && 'w-full',

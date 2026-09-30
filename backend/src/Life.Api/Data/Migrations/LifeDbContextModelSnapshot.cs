@@ -110,6 +110,78 @@ namespace Life.Api.Data.Migrations
                     b.ToTable("Books", (string)null);
                 });
 
+            modelBuilder.Entity("Life.Api.Entities.CustomCollection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ColorKey")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("IconKey")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CustomCollections", (string)null);
+                });
+
+            modelBuilder.Entity("Life.Api.Entities.CustomCollectionItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .HasMaxLength(8000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CustomCollectionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomCollectionId");
+
+                    b.ToTable("CustomCollectionItems", (string)null);
+                });
+
             modelBuilder.Entity("Life.Api.Entities.Idea", b =>
                 {
                     b.Property<Guid>("Id")
@@ -346,6 +418,9 @@ namespace Life.Api.Data.Migrations
                     b.Property<bool>("NotifyTasks")
                         .HasColumnType("bit");
 
+                    b.Property<TimeOnly>("ReminderTime")
+                        .HasColumnType("time");
+
                     b.Property<string>("TimeZone")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -376,6 +451,28 @@ namespace Life.Api.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Life.Api.Entities.CustomCollection", b =>
+                {
+                    b.HasOne("Life.Api.Entities.User", "User")
+                        .WithMany("CustomCollections")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Life.Api.Entities.CustomCollectionItem", b =>
+                {
+                    b.HasOne("Life.Api.Entities.CustomCollection", "Collection")
+                        .WithMany("Items")
+                        .HasForeignKey("CustomCollectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Collection");
                 });
 
             modelBuilder.Entity("Life.Api.Entities.Idea", b =>
@@ -444,6 +541,11 @@ namespace Life.Api.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Life.Api.Entities.CustomCollection", b =>
+                {
+                    b.Navigation("Items");
+                });
+
             modelBuilder.Entity("Life.Api.Entities.User", b =>
                 {
                     b.Navigation("Birthdays");
@@ -451,6 +553,8 @@ namespace Life.Api.Data.Migrations
                     b.Navigation("Books");
 
                     b.Navigation("Contests");
+
+                    b.Navigation("CustomCollections");
 
                     b.Navigation("Ideas");
 

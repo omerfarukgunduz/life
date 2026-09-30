@@ -33,6 +33,20 @@ public static class Mappers
 
     public static IdeaDto ToDto(Idea entity) => new(entity.Id, entity.Title, entity.Content, entity.CreatedAt, entity.UpdatedAt);
 
+    public static CustomCollectionDto ToDto(CustomCollection entity, int itemCount) =>
+        new(
+            entity.Id,
+            entity.Name,
+            entity.Description,
+            entity.IconKey,
+            entity.ColorKey,
+            itemCount,
+            entity.CreatedAt,
+            entity.UpdatedAt);
+
+    public static CustomCollectionItemDto ToDto(CustomCollectionItem entity) =>
+        new(entity.Id, entity.CustomCollectionId, entity.Title, entity.Content, entity.CreatedAt, entity.UpdatedAt);
+
     public static ReminderDto ToDto(Reminder entity) => new(
         entity.Id,
         entity.EntityType switch
@@ -45,5 +59,9 @@ public static class Mappers
         entity.EntityId, entity.ReminderAt, entity.Sent, entity.CreatedAt);
 
     public static SettingsDto ToDto(UserSettings entity) => new(
-        entity.TimeZone, entity.NotifyTasks, entity.NotifyBirthdays, entity.NotifyContests);
+        entity.TimeZone,
+        entity.NotifyTasks,
+        entity.NotifyBirthdays,
+        entity.NotifyContests,
+        TimeZoneHelper.FormatTime(entity.ReminderTime));
 }

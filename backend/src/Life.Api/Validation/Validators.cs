@@ -150,11 +150,57 @@ public class UpdateIdeaRequestValidator : AbstractValidator<UpdateIdeaRequest>
     public UpdateIdeaRequestValidator() { RuleFor(x => x.Title).NotEmpty().WithMessage("Başlık zorunludur."); }
 }
 
+public class CreateCustomCollectionRequestValidator : AbstractValidator<CreateCustomCollectionRequest>
+{
+    public CreateCustomCollectionRequestValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().WithMessage("Ad zorunludur.").MaximumLength(200);
+        RuleFor(x => x.IconKey)
+            .Must(k => k is null || CustomCollectionAppearance.IconKeys.Contains(k))
+            .WithMessage("Geçersiz ikon.");
+        RuleFor(x => x.ColorKey)
+            .Must(k => k is null || CustomCollectionAppearance.ColorKeys.Contains(k))
+            .WithMessage("Geçersiz renk.");
+    }
+}
+
+public class UpdateCustomCollectionRequestValidator : AbstractValidator<UpdateCustomCollectionRequest>
+{
+    public UpdateCustomCollectionRequestValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().WithMessage("Ad zorunludur.").MaximumLength(200);
+        RuleFor(x => x.IconKey)
+            .Must(k => k is null || CustomCollectionAppearance.IconKeys.Contains(k))
+            .WithMessage("Geçersiz ikon.");
+        RuleFor(x => x.ColorKey)
+            .Must(k => k is null || CustomCollectionAppearance.ColorKeys.Contains(k))
+            .WithMessage("Geçersiz renk.");
+    }
+}
+
+public class CreateCustomCollectionItemRequestValidator : AbstractValidator<CreateCustomCollectionItemRequest>
+{
+    public CreateCustomCollectionItemRequestValidator()
+    {
+        RuleFor(x => x.Title).NotEmpty().WithMessage("Başlık zorunludur.");
+    }
+}
+
+public class UpdateCustomCollectionItemRequestValidator : AbstractValidator<UpdateCustomCollectionItemRequest>
+{
+    public UpdateCustomCollectionItemRequestValidator()
+    {
+        RuleFor(x => x.Title).NotEmpty().WithMessage("Başlık zorunludur.");
+    }
+}
+
 public class UpdateSettingsRequestValidator : AbstractValidator<UpdateSettingsRequest>
 {
     public UpdateSettingsRequestValidator()
     {
         RuleFor(x => x.TimeZone).NotEmpty().WithMessage("Saat dilimi zorunludur.").Must(IsValidTimeZone).WithMessage("Geçerli bir IANA saat dilimi girin.");
+        RuleFor(x => x.ReminderTime).NotEmpty().WithMessage("Bildirim saati zorunludur.")
+            .Must(t => TimeZoneHelper.TryParseTime(t, out _)).WithMessage("Bildirim saati HH:mm formatında olmalıdır.");
     }
     private static bool IsValidTimeZone(string timeZone)
     {

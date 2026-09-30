@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '../../components/Button'
-import { Input } from '../../components/Input'
+import { Button, Input, LinkButton } from '../../components'
 import { useAuth } from '../../context/AuthContext'
 import { ApiError } from '../../services/api'
 import { useTheme } from '../../hooks/useTheme'
@@ -58,17 +57,11 @@ export default function RegisterPage() {
   })
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-bg px-4 py-10">
-      <div className="w-full max-w-sm">
-        <p className="mb-8 text-sm font-semibold tracking-tight text-text">
-          Life
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-text">
-          Kayıt
-        </h1>
-        <p className="mt-1 mb-8 text-sm text-secondary">
-          Yeni bir hesap oluşturun.
-        </p>
+    <div className="flex min-h-dvh items-center justify-center bg-bg px-5 py-10">
+      <div className="w-full max-w-[360px]">
+        <p className="footnote mb-2 font-semibold text-secondary">Life</p>
+        <h1 className="large-title text-text">Kayıt</h1>
+        <p className="subheadline mt-1 mb-6 text-secondary">Yeni bir hesap oluşturun.</p>
 
         <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
           <Input
@@ -104,12 +97,12 @@ export default function RegisterPage() {
           </Button>
         </form>
 
-        <p className="mt-6 text-sm text-secondary">
-          Zaten hesabınız var mı?{' '}
-          <Link to="/giris" className="font-medium text-accent">
+        <div className="mt-4">
+          <p className="subheadline mb-1 text-secondary">Zaten hesabınız var mı?</p>
+          <LinkButton to="/giris" className="px-0">
             Giriş yap
-          </Link>
-        </p>
+          </LinkButton>
+        </div>
       </div>
     </div>
   )

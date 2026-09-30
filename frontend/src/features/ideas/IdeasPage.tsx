@@ -1,20 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Lightbulb } from 'lucide-react'
 import {
   BottomSheet,
   Button,
   Dialog,
   EmptyState,
   IconTile,
+  ListSection,
+  NavAddButton,
   PageHeader,
 } from '../../components'
-import { DesktopAddButton } from '../../layouts/AppShell'
 import { useQuickAdd } from '../../hooks/useQuickAdd'
 import { useToast } from '../../context/ToastContext'
 import { ideasApi } from '../../services/endpoints'
 import type { Idea } from '../../types'
 import { formatShortDate } from '../../utils'
+import { collectionIcons } from '../../utils/collectionIcons'
 import { IdeaForm } from './IdeaForm'
 
 export default function IdeasPage() {
@@ -43,45 +44,50 @@ export default function IdeasPage() {
     <section>
       <PageHeader
         title="Fikirler"
-        action={<DesktopAddButton onClick={() => openCreate('idea')} label="Ekle" />}
+        trailing={<NavAddButton onClick={() => openCreate('idea')} label="Fikir ekle" />}
       />
 
       {isLoading ? (
-        <div className="space-y-2" aria-hidden>
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="h-12 animate-pulse rounded-[10px] bg-surface" />
-          ))}
+        <div className="grouped-list px-4 py-3" aria-hidden>
+          <div className="h-12 animate-pulse rounded-[8px] bg-bg" />
         </div>
       ) : null}
 
       {!isLoading && data.length === 0 ? (
         <EmptyState
-          message="Fikir yok."
+          message="Henüz fikir eklemedin."
           actionLabel="Fikir ekle"
           onAction={() => openCreate('idea')}
         />
       ) : null}
 
       {data.length > 0 ? (
-      <ul className="surface divide-y divide-divider px-4">
-        {data.map((idea) => (
-          <li key={idea.id}>
-            <button
-              type="button"
-              className="flex w-full min-h-11 items-center gap-3 py-3 text-left"
-              onClick={() => setEditing(idea)}
-            >
-              <IconTile icon={Lightbulb} bg="bg-soft-yellow" fg="text-[#C48A2A]" size="sm" />
-              <p className="min-w-0 flex-1 truncate text-[15px] font-medium text-text">
-                {idea.title}
-              </p>
-              <time className="shrink-0 text-[13px] text-secondary" dateTime={idea.createdAt}>
-                {formatShortDate(idea.createdAt)}
-              </time>
-            </button>
-          </li>
-        ))}
-      </ul>
+        <ListSection>
+          <ul>
+            {data.map((idea) => (
+              <li key={idea.id}>
+                <button
+                  type="button"
+                  className="flex min-h-[56px] w-full items-center gap-3 px-4 py-2.5 text-left active:opacity-70"
+                  onClick={() => setEditing(idea)}
+                >
+                  <IconTile {...collectionIcons.ideas} size="sm" />
+                  <span className="min-w-0 flex-1">
+                    <span className="headline block truncate text-text">{idea.title}</span>
+                    {idea.content ? (
+                      <span className="subheadline mt-0.5 line-clamp-1 text-secondary">
+                        {idea.content}
+                      </span>
+                    ) : null}
+                  </span>
+                  <time className="footnote shrink-0 text-secondary" dateTime={idea.createdAt}>
+                    {formatShortDate(idea.createdAt)}
+                  </time>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </ListSection>
       ) : null}
 
       <BottomSheet

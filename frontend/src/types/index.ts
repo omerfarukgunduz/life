@@ -116,6 +116,38 @@ export interface IdeaInput {
   content?: string | null
 }
 
+export interface CustomCollection {
+  id: string
+  name: string
+  description: string | null
+  iconKey: string
+  colorKey: string
+  itemCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CustomCollectionInput {
+  name: string
+  description?: string | null
+  iconKey?: string
+  colorKey?: string
+}
+
+export interface CustomCollectionItem {
+  id: string
+  collectionId: string
+  title: string
+  content: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CustomCollectionItemInput {
+  title: string
+  content?: string | null
+}
+
 export interface UpcomingItem {
   date: string
   type: UpcomingType
@@ -124,10 +156,19 @@ export interface UpcomingItem {
   entityId: string
 }
 
+export interface TodayReminder {
+  type: UpcomingType
+  entityId: string
+  title: string
+  reminderAt: string
+  sent: boolean
+}
+
 export interface Dashboard {
   todayTasks: Task[]
   upcoming: UpcomingItem[]
   readingBook: Book | null
+  todayReminders: TodayReminder[]
 }
 
 export interface CalendarItem {
@@ -146,6 +187,7 @@ export interface UserSettings {
   notifyTasks: boolean
   notifyBirthdays: boolean
   notifyContests: boolean
+  reminderTime: string
 }
 
 export type Settings = UserSettings
@@ -163,6 +205,22 @@ export interface ExportData {
   contests: Contest[]
   books: Book[]
   ideas: Idea[]
+  customCollections?: ExportCustomCollection[]
+}
+
+export interface ExportCustomCollection {
+  name: string
+  description?: string | null
+  iconKey?: string
+  colorKey?: string
+  createdAt: string
+  updatedAt: string
+  items: {
+    title: string
+    content?: string | null
+    createdAt: string
+    updatedAt: string
+  }[]
 }
 
 export interface ApiProblemDetails {

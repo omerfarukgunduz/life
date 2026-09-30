@@ -13,6 +13,7 @@ public class User
     public ICollection<PhotographyContest> Contests { get; set; } = new List<PhotographyContest>();
     public ICollection<Book> Books { get; set; } = new List<Book>();
     public ICollection<Idea> Ideas { get; set; } = new List<Idea>();
+    public ICollection<CustomCollection> CustomCollections { get; set; } = new List<CustomCollection>();
     public ICollection<Reminder> Reminders { get; set; } = new List<Reminder>();
     public ICollection<PushSubscription> PushSubscriptions { get; set; } = new List<PushSubscription>();
 }

@@ -13,7 +13,7 @@ export function Toast({ message, tone = 'default', className }: ToastProps) {
     <div
       role="status"
       className={cn(
-        'pointer-events-auto max-w-sm rounded-[12px] border border-border bg-surface px-4 py-2.5 text-[14px] text-text shadow-soft',
+        'pointer-events-auto max-w-sm rounded-[12px] border border-border bg-surface px-4 py-2.5 text-[14px] text-text shadow-[var(--shadow-subtle)]',
         tone === 'error' && 'text-red-600 dark:text-red-400',
         className,
       )}

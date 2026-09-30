@@ -7,10 +7,18 @@ public record UpcomingItemDto(
     string? Subtitle,
     Guid EntityId);
 
+public record TodayReminderItemDto(
+    string Type,
+    Guid EntityId,
+    string Title,
+    DateTime ReminderAt,
+    bool Sent);
+
 public record DashboardDto(
     IReadOnlyList<TaskDto> TodayTasks,
     IReadOnlyList<UpcomingItemDto> Upcoming,
-    BookDto? ReadingBook);
+    BookDto? ReadingBook,
+    IReadOnlyList<TodayReminderItemDto> TodayReminders);
 
 public record CalendarItemDto(
     string Date,

@@ -7,14 +7,23 @@ import { useToast } from '../../context/ToastContext'
 import { ApiError } from '../../services/api'
 import { tasksApi } from '../../services/endpoints'
 import type { Priority, Task } from '../../types'
+import { toDateOnly } from '../../utils'
 
 const schema = z.object({
   title: z.string().min(1, 'Başlık gerekli'),
   description: z.string().optional(),
-  dueDate: z.string().optional(),
+  dueDate: z
+    .string()
+    .optional()
+    .refine(
+      (value) => {
+        if (!value) return true
+        return value >= '2026-01-01'
+      },
+      { message: 'Tarih 2026 ve sonrası olmalı' },
+    ),
   dueTime: z.string().optional(),
   priority: z.enum(['Low', 'Normal', 'High']),
-  category: z.string().optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -37,10 +46,9 @@ export function TaskForm({ initial, onDone }: TaskFormProps) {
     defaultValues: {
       title: initial?.title ?? '',
       description: initial?.description ?? '',
-      dueDate: initial?.dueDate ?? '',
+      dueDate: initial ? (initial.dueDate ?? '') : toDateOnly(new Date()),
       dueTime: initial?.dueTime ?? '',
       priority: (initial?.priority ?? 'Normal') as FormValues['priority'],
-      category: initial?.category ?? 'Kişisel',
     },
   })
 
@@ -52,7 +60,7 @@ export function TaskForm({ initial, onDone }: TaskFormProps) {
         dueDate: values.dueDate || null,
         dueTime: values.dueTime || null,
         priority: values.priority as Priority,
-        category: values.category || 'Kişisel',
+        category: null,
         isCompleted: initial?.isCompleted ?? false,
       }
       if (initial) return tasksApi.update(initial.id, payload)
@@ -62,7 +70,7 @@ export function TaskForm({ initial, onDone }: TaskFormProps) {
       await qc.invalidateQueries({ queryKey: ['tasks'] })
       await qc.invalidateQueries({ queryKey: ['dashboard'] })
       await qc.invalidateQueries({ queryKey: ['calendar'] })
-      toast(initial ? 'Görev güncellendi' : 'Görev eklendi')
+      toast(initial ? 'İş güncellendi' : 'İş eklendi')
       onDone()
     },
     onError: (err: unknown) => {
@@ -78,21 +86,17 @@ export function TaskForm({ initial, onDone }: TaskFormProps) {
     <form className="flex flex-col gap-4" onSubmit={onSubmit}>
       <Input label="Başlık" error={errors.title?.message} {...register('title')} />
       <Textarea label="Açıklama" {...register('description')} />
-      <div className="grid grid-cols-2 gap-3">
-        <DatePicker label="Tarih" mode="date" {...register('dueDate')} />
-        <DatePicker label="Saat" mode="time" {...register('dueTime')} />
-      </div>
-      <Select
-        label="Kategori"
-        options={[
-          { value: 'Kişisel', label: 'Kişisel' },
-          { value: 'İş', label: 'İş' },
-          { value: 'Fotoğraf', label: 'Fotoğraf' },
-          { value: 'Yazılım', label: 'Yazılım' },
-          { value: 'Diğer', label: 'Diğer' },
-        ]}
-        {...register('category')}
+      <DatePicker
+        label="Tarih"
+        mode="date"
+        minYear={2026}
+        error={errors.dueDate?.message}
+        defaultValue={
+          initial ? (initial.dueDate ?? '') : toDateOnly(new Date())
+        }
+        {...register('dueDate')}
       />
+      <DatePicker label="Saat" mode="time" className="max-w-[168px]" {...register('dueTime')} />
       <Select
         label="Öncelik"
         options={[

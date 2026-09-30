@@ -23,6 +23,10 @@ public class ExportImportService
         var contests = await _db.Contests.AsNoTracking().Where(c => c.UserId == userId).ToListAsync(ct);
         var books = await _db.Books.AsNoTracking().Where(b => b.UserId == userId).ToListAsync(ct);
         var ideas = await _db.Ideas.AsNoTracking().Where(i => i.UserId == userId).ToListAsync(ct);
+        var customCollections = await _db.CustomCollections.AsNoTracking()
+            .Include(c => c.Items)
+            .Where(c => c.UserId == userId)
+            .ToListAsync(ct);
         var push = await _db.PushSubscriptions.AsNoTracking().Where(p => p.UserId == userId).ToListAsync(ct);
 
         return new ExportDataDto
@@ -58,6 +62,22 @@ public class ExportImportService
             {
                 Title = i.Title, Content = i.Content, CreatedAt = i.CreatedAt, UpdatedAt = i.UpdatedAt
             }).ToList(),
+            CustomCollections = customCollections.Select(c => new ExportCustomCollectionDto
+            {
+                Name = c.Name,
+                Description = c.Description,
+                IconKey = c.IconKey,
+                ColorKey = c.ColorKey,
+                CreatedAt = c.CreatedAt,
+                UpdatedAt = c.UpdatedAt,
+                Items = c.Items.Select(i => new ExportCustomCollectionItemDto
+                {
+                    Title = i.Title,
+                    Content = i.Content,
+                    CreatedAt = i.CreatedAt,
+                    UpdatedAt = i.UpdatedAt,
+                }).ToList(),
+            }).ToList(),
             PushSubscriptions = push.Select(p => new ExportPushSubscriptionDto
             {
                 Endpoint = p.Endpoint, P256dh = p.P256dh, Auth = p.Auth, CreatedAt = p.CreatedAt
@@ -69,6 +89,7 @@ public class ExportImportService
     {
         var settings = await _db.UserSettings.FirstOrDefaultAsync(s => s.UserId == userId, ct);
         var timeZone = settings?.TimeZone ?? TimeZoneHelper.DefaultTimeZone;
+        var reminderTime = ReminderService.ResolveReminderTime(settings?.ReminderTime);
 
         _db.Reminders.RemoveRange(await _db.Reminders.Where(r => r.UserId == userId).ToListAsync(ct));
         _db.Tasks.RemoveRange(await _db.Tasks.Where(t => t.UserId == userId).ToListAsync(ct));
@@ -76,6 +97,7 @@ public class ExportImportService
         _db.Contests.RemoveRange(await _db.Contests.Where(c => c.UserId == userId).ToListAsync(ct));
         _db.Books.RemoveRange(await _db.Books.Where(b => b.UserId == userId).ToListAsync(ct));
         _db.Ideas.RemoveRange(await _db.Ideas.Where(i => i.UserId == userId).ToListAsync(ct));
+        _db.CustomCollections.RemoveRange(await _db.CustomCollections.Where(c => c.UserId == userId).ToListAsync(ct));
         if (data.PushSubscriptions is not null)
             _db.PushSubscriptions.RemoveRange(await _db.PushSubscriptions.Where(p => p.UserId == userId).ToListAsync(ct));
         await _db.SaveChangesAsync(ct);
@@ -152,6 +174,39 @@ public class ExportImportService
             });
         }
 
+        if (data.CustomCollections is not null)
+        {
+            foreach (var collection in data.CustomCollections)
+            {
+                var createdAt = collection.CreatedAt == default ? DateTime.UtcNow : collection.CreatedAt;
+                var updatedAt = collection.UpdatedAt == default ? createdAt : collection.UpdatedAt;
+                var entity = new CustomCollection
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    Name = collection.Name,
+                    Description = collection.Description,
+                    IconKey = CustomCollectionAppearance.NormalizeIconKey(collection.IconKey),
+                    ColorKey = CustomCollectionAppearance.NormalizeColorKey(collection.ColorKey),
+                    CreatedAt = createdAt,
+                    UpdatedAt = updatedAt,
+                };
+                _db.CustomCollections.Add(entity);
+                foreach (var item in collection.Items)
+                {
+                    _db.CustomCollectionItems.Add(new CustomCollectionItem
+                    {
+                        Id = Guid.NewGuid(),
+                        CustomCollectionId = entity.Id,
+                        Title = item.Title,
+                        Content = item.Content,
+                        CreatedAt = item.CreatedAt == default ? DateTime.UtcNow : item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt == default ? DateTime.UtcNow : item.UpdatedAt,
+                    });
+                }
+            }
+        }
+
         if (data.PushSubscriptions is not null)
         {
             foreach (var item in data.PushSubscriptions)
@@ -166,9 +221,9 @@ public class ExportImportService
         }
 
         await _db.SaveChangesAsync(ct);
-        foreach (var task in newTasks) await _reminderService.RefreshTaskRemindersAsync(task, timeZone, ct);
-        foreach (var birthday in newBirthdays) await _reminderService.RefreshBirthdayRemindersAsync(birthday, timeZone, ct);
-        foreach (var contest in newContests) await _reminderService.RefreshContestRemindersAsync(contest, timeZone, ct);
+        foreach (var task in newTasks) await _reminderService.RefreshTaskRemindersAsync(task, timeZone, reminderTime, ct);
+        foreach (var birthday in newBirthdays) await _reminderService.RefreshBirthdayRemindersAsync(birthday, timeZone, reminderTime, ct);
+        foreach (var contest in newContests) await _reminderService.RefreshContestRemindersAsync(contest, timeZone, reminderTime, ct);
         await _db.SaveChangesAsync(ct);
     }
 }

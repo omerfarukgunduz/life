@@ -3,7 +3,7 @@ import type { Task } from '../types'
 import { formatClock, formatDayMonth } from '../utils'
 import { cn } from '../utils/cn'
 import { Checkbox } from './Checkbox'
-import { categoryTone, IconTile } from './IconTile'
+import { IconTile, typeTone } from './IconTile'
 
 type TaskRowProps = {
   task: Task
@@ -13,9 +13,8 @@ type TaskRowProps = {
 }
 
 export function TaskRow({ task, onToggle, onOpen, showDate }: TaskRowProps) {
-  const tone = categoryTone(task.category)
+  const tone = typeTone('task')
   const meta = [
-    task.category,
     showDate && task.dueDate ? formatDayMonth(task.dueDate) : null,
     formatClock(task.dueTime),
   ]
@@ -24,36 +23,40 @@ export function TaskRow({ task, onToggle, onOpen, showDate }: TaskRowProps) {
 
   const body = (
     <>
-      <IconTile {...tone} />
+      <IconTile {...tone} size="sm" />
       <span className="min-w-0 flex-1">
         <span
           className={cn(
-            'block truncate text-[15px] font-medium text-text',
-            task.isCompleted && 'text-secondary line-through',
+            'headline block truncate text-text',
+            task.isCompleted &&
+              'text-secondary line-through decoration-text decoration-1',
           )}
         >
           {task.title}
         </span>
         {meta ? (
-          <span className="mt-0.5 block truncate text-[13px] text-secondary">{meta}</span>
+          <span className="subheadline mt-0.5 block truncate text-secondary">{meta}</span>
         ) : null}
       </span>
       {onOpen ? (
-        <ChevronRight size={18} strokeWidth={1.75} className="shrink-0 text-[#C8C8C6]" />
+        <ChevronRight size={16} strokeWidth={2} className="shrink-0 text-tertiary" />
       ) : null}
     </>
   )
 
   return (
-    <div className={cn('flex items-center gap-3 py-3', task.isCompleted && 'opacity-80')}>
+    <div className="flex min-h-[56px] items-center gap-3 px-4 py-2.5">
       <Checkbox
         checked={task.isCompleted}
         onChange={onToggle}
         aria-label={`${task.title} tamamla`}
-        className="!min-h-0 !min-w-0"
       />
       {onOpen ? (
-        <button type="button" onClick={onOpen} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+        <button
+          type="button"
+          onClick={onOpen}
+          className="flex min-w-0 flex-1 items-center gap-3 text-left active:opacity-70"
+        >
           {body}
         </button>
       ) : (

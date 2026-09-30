@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
-import { IconTile, PageHeader, SegmentControl, typeTone } from '../../components'
+import { IconTile, ListSection, PageHeader, SegmentControl, typeTone } from '../../components'
 import { calendarApi } from '../../services/endpoints'
 import type { CalendarItem, CalendarItemType } from '../../types'
 import {
@@ -11,7 +11,7 @@ import {
 import { cn } from '../../utils/cn'
 
 const typeLabel: Record<CalendarItemType, string> = {
-  task: 'Görev',
+  task: 'İş',
   birthday: 'Doğum günü',
   contest: 'Yarışma',
 }
@@ -118,121 +118,115 @@ export default function CalendarPage() {
       ) : null}
 
       {view === 'agenda' ? (
-        <div className="space-y-6">
+        <div>
           {!isLoading && agendaDates.length === 0 ? (
-            <p className="text-[14px] text-secondary">Yakın tarihte olay yok.</p>
+            <p className="px-1 text-[15px] text-secondary">Yakın tarihte olay yok.</p>
           ) : null}
           {agendaDates.map((date) => (
-            <section key={date} className="surface px-4 py-3">
-              <h2 className="text-[14px] font-semibold text-text">
-                {formatDayMonthWeekday(date)}
-              </h2>
-              <ul className="mt-1 divide-y divide-divider">
+            <ListSection key={date} title={formatDayMonthWeekday(date)} compactTitle>
+              <ul>
                 {(byDate.get(date) ?? []).map((item) => (
-                  <li
-                    key={`${item.type}-${item.entityId}-${item.time ?? ''}`}
-                    className="flex items-center gap-3 py-3 text-[14px]"
-                  >
-                    <IconTile {...typeTone(item.type)} size="sm" />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate font-medium text-text">{item.title}</span>
-                      <span className="text-[13px] text-secondary">
-                        {[item.time?.slice(0, 5), typeLabel[item.type]].filter(Boolean).join(' · ')}
+                  <li key={`${item.type}-${item.entityId}-${item.time ?? ''}`}>
+                    <div className="flex min-h-[56px] items-center gap-3 px-4 py-2.5">
+                      <IconTile {...typeTone(item.type)} size="sm" />
+                      <span className="min-w-0 flex-1">
+                        <span className="headline block truncate text-text">{item.title}</span>
+                        <span className="subheadline mt-0.5 block text-secondary">
+                          {[item.time?.slice(0, 5), typeLabel[item.type]].filter(Boolean).join(' · ')}
+                        </span>
                       </span>
-                    </span>
+                    </div>
                   </li>
                 ))}
               </ul>
-            </section>
+            </ListSection>
           ))}
         </div>
       ) : (
-        <div className="surface space-y-4 p-4">
-          <div className="flex items-center justify-between gap-3">
-            <button
-              type="button"
-              className="touch-target text-[14px] text-secondary"
-              onClick={() =>
-                setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() - 1, 1))
-              }
-            >
-              Önceki
-            </button>
-            <p className="text-[15px] font-medium capitalize text-text">{monthLabel}</p>
-            <button
-              type="button"
-              className="touch-target text-[14px] text-secondary"
-              onClick={() =>
-                setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() + 1, 1))
-              }
-            >
-              Sonraki
-            </button>
-          </div>
+        <div className="space-y-6">
+          <div className="grouped-list p-3">
+            <div className="mb-2 flex h-11 items-center justify-between px-1">
+              <button
+                type="button"
+                className="min-h-11 min-w-11 px-2 text-[17px] text-accent"
+                onClick={() =>
+                  setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() - 1, 1))
+                }
+              >
+                ‹
+              </button>
+              <p className="headline capitalize text-text">{monthLabel}</p>
+              <button
+                type="button"
+                className="min-h-11 min-w-11 px-2 text-[17px] text-accent"
+                onClick={() =>
+                  setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() + 1, 1))
+                }
+              >
+                ›
+              </button>
+            </div>
 
-          <div className="grid grid-cols-7 gap-1 text-center text-[12px] text-secondary">
-            {['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pz'].map((d) => (
-              <div key={d} className="py-1">
-                {d}
-              </div>
-            ))}
-            {range.days.map((day) => {
-              const key = toDateOnly(day)
-              const inMonth = day.getMonth() === anchor.getMonth()
-              const hasEvents = (byDate.get(key)?.length ?? 0) > 0
-              const selected = key === selectedDay
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setSelectedDay(key)}
-                  className={cn(
-                    'relative flex aspect-square flex-col items-center justify-center rounded-[10px] text-[13px]',
-                    !inMonth && 'text-secondary/50',
-                    selected && 'bg-accent text-white',
-                    !selected && inMonth && 'text-text',
-                  )}
-                >
-                  {day.getDate()}
-                  {hasEvents ? (
-                    <span
-                      className={cn(
-                        'absolute bottom-1 size-1 rounded-full',
-                        selected ? 'bg-white' : 'bg-accent',
-                      )}
-                      aria-hidden
-                    />
-                  ) : null}
-                </button>
-              )
-            })}
-          </div>
-
-          <section>
-            <h2 className="mb-2 text-[14px] font-semibold text-text">
-              {formatWeekdayDayMonth(selectedDay)}
-            </h2>
-            {selectedItems.length === 0 ? (
-              <p className="text-[14px] text-secondary">Bu günde olay yok.</p>
-            ) : (
-              <ul className="divide-y divide-divider">
-                {selectedItems.map((item) => (
-                  <li
-                    key={`${item.type}-${item.entityId}-${item.time ?? ''}`}
-                    className="flex items-center gap-3 py-3 text-[14px]"
+            <div className="grid grid-cols-7 text-center">
+              {['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pz'].map((d) => (
+                <div key={d} className="py-1 text-[12px] font-medium text-secondary">
+                  {d}
+                </div>
+              ))}
+              {range.days.map((day) => {
+                const key = toDateOnly(day)
+                const inMonth = day.getMonth() === anchor.getMonth()
+                const hasEvents = (byDate.get(key)?.length ?? 0) > 0
+                const selected = key === selectedDay
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setSelectedDay(key)}
+                    className={cn(
+                      'relative mx-auto flex size-11 items-center justify-center rounded-full text-[17px]',
+                      !inMonth && 'text-tertiary',
+                      selected && 'bg-accent font-semibold text-white',
+                      !selected && inMonth && 'text-text',
+                    )}
                   >
-                    <IconTile {...typeTone(item.type)} size="sm" />
-                    <span className="min-w-0">
-                      <span className="block truncate font-medium text-text">{item.title}</span>
-                      <span className="text-[13px] text-secondary">
-                        {[item.time?.slice(0, 5), typeLabel[item.type]].filter(Boolean).join(' · ')}
+                    {day.getDate()}
+                    {hasEvents ? (
+                      <span
+                        className={cn(
+                          'absolute bottom-1 size-1 rounded-full',
+                          selected ? 'bg-white' : 'bg-accent',
+                        )}
+                        aria-hidden
+                      />
+                    ) : null}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <ListSection title={formatWeekdayDayMonth(selectedDay)} compactTitle>
+            {selectedItems.length === 0 ? (
+              <p className="px-4 py-4 text-[15px] text-secondary">Bu günde olay yok.</p>
+            ) : (
+              <ul>
+                {selectedItems.map((item) => (
+                  <li key={`${item.type}-${item.entityId}-${item.time ?? ''}`}>
+                    <div className="flex min-h-[56px] items-center gap-3 px-4 py-2.5">
+                      <IconTile {...typeTone(item.type)} size="sm" />
+                      <span className="min-w-0 flex-1">
+                        <span className="headline block truncate text-text">{item.title}</span>
+                        <span className="subheadline mt-0.5 block text-secondary">
+                          {[item.time?.slice(0, 5), typeLabel[item.type]].filter(Boolean).join(' · ')}
+                        </span>
                       </span>
-                    </span>
+                    </div>
                   </li>
                 ))}
               </ul>
             )}
-          </section>
+          </ListSection>
         </div>
       )}
     </section>

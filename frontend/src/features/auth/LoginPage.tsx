@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '../../components/Button'
-import { Input } from '../../components/Input'
+import { Button, Input, LinkButton } from '../../components'
 import { useAuth } from '../../context/AuthContext'
 import { ApiError } from '../../services/api'
 import { useTheme } from '../../hooks/useTheme'
@@ -50,17 +49,11 @@ export default function LoginPage() {
   })
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-bg px-4 py-10">
-      <div className="w-full max-w-sm">
-        <p className="mb-8 text-sm font-semibold tracking-tight text-text">
-          Life
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-text">
-          Giriş
-        </h1>
-        <p className="mt-1 mb-8 text-sm text-secondary">
-          Hesabınıza giriş yapın.
-        </p>
+    <div className="flex min-h-dvh items-center justify-center bg-bg px-5 py-10">
+      <div className="w-full max-w-[360px]">
+        <p className="footnote mb-2 font-semibold text-secondary">Life</p>
+        <h1 className="large-title text-text">Giriş</h1>
+        <p className="subheadline mt-1 mb-6 text-secondary">Hesabınıza giriş yapın.</p>
 
         <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
           <Input
@@ -89,12 +82,12 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <p className="mt-6 text-sm text-secondary">
-          Hesabınız yok mu?{' '}
-          <Link to="/kayit" className="font-medium text-accent">
+        <div className="mt-4">
+          <p className="subheadline mb-1 text-secondary">Hesabınız yok mu?</p>
+          <LinkButton to="/kayit" className="px-0">
             Kayıt ol
-          </Link>
-        </p>
+          </LinkButton>
+        </div>
       </div>
     </div>
   )

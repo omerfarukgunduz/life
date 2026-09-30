@@ -6,15 +6,14 @@ import {
   Camera,
   CheckSquare,
   Lightbulb,
-  Plus,
   Settings,
   Sun,
 } from 'lucide-react'
 import { BottomNavigation } from '../components/BottomNavigation'
 import { BottomSheet } from '../components/BottomSheet'
-import { Button } from '../components/Button'
 import { IconTile } from '../components/IconTile'
 import { quickAddOptions } from '../utils/collectionIcons'
+import { useAuth } from '../hooks/useAuth'
 import { useOnline } from '../hooks/useOnline'
 import { useQuickAdd } from '../hooks/useQuickAdd'
 import { TaskForm } from '../features/tasks/TaskForm'
@@ -26,8 +25,10 @@ import { cn } from '../utils/cn'
 
 const sidebarMain = [
   { to: '/', label: 'Bugün', icon: Sun, end: true },
-  { to: '/tasks', label: 'Görevler', icon: CheckSquare },
+  { to: '/tasks', label: 'İşler', icon: CheckSquare },
   { to: '/calendar', label: 'Takvim', icon: CalendarDays },
+  { to: '/collections', label: 'Koleksiyonlar', icon: BookOpen },
+  { to: '/settings', label: 'Ayarlar', icon: Settings },
 ] as const
 
 const sidebarCollections = [
@@ -38,7 +39,7 @@ const sidebarCollections = [
 ] as const
 
 const createTitles = {
-  task: 'Görev ekle',
+  task: 'İş ekle',
   birthday: 'Doğum günü ekle',
   contest: 'Yarışma ekle',
   book: 'Kitap ekle',
@@ -46,15 +47,16 @@ const createTitles = {
 } as const
 
 export function AppShell() {
+  const { logout } = useAuth()
   const online = useOnline()
   const { pickerOpen, createEntity, openPicker, closePicker, openCreate, closeCreate } =
     useQuickAdd()
 
   return (
-    <div className="min-h-dvh bg-bg text-text">
+    <div className="min-h-dvh bg-bg text-text safe-top">
       {!online ? (
         <div
-          className="border-b border-border bg-surface px-4 py-1.5 text-center text-[12px] text-secondary"
+          className="border-b border-divider bg-surface px-5 py-1.5 text-center caption-text text-secondary"
           role="status"
         >
           İnternet bağlantısı yok
@@ -62,10 +64,10 @@ export function AppShell() {
       ) : null}
 
       <div className="lg:flex lg:min-h-dvh">
-        <aside className="hidden w-60 shrink-0 border-r border-border bg-surface px-4 py-6 lg:flex lg:flex-col">
-          <div className="mb-8 px-2 text-[18px] font-semibold tracking-tight">Life</div>
-          <nav className="flex flex-1 flex-col gap-6" aria-label="Yan menü">
-            <ul className="space-y-1">
+        <aside className="hidden w-56 shrink-0 border-r border-divider bg-surface px-3 py-6 lg:flex lg:flex-col">
+          <div className="mb-6 px-3 text-[20px] font-bold tracking-tight text-text">Life</div>
+          <nav className="flex flex-1 flex-col gap-1" aria-label="Yan menü">
+            <ul className="space-y-0.5">
               {sidebarMain.map((item) => (
                 <li key={item.to}>
                   <NavLink
@@ -73,8 +75,40 @@ export function AppShell() {
                     end={'end' in item ? item.end : false}
                     className={({ isActive }) =>
                       cn(
-                        'flex touch-target items-center gap-3 rounded-[12px] px-3 text-[14px]',
-                        isActive ? 'bg-soft-blue font-medium text-accent' : 'text-secondary',
+                        'flex min-h-11 items-center gap-3 rounded-[10px] px-3 text-[15px] transition-colors duration-200',
+                        isActive
+                          ? 'bg-soft-blue font-semibold text-accent'
+                          : 'text-text active:opacity-70',
+                      )
+                    }
+                  >
+                    <item.icon size={20} strokeWidth={1.75} />
+                    {item.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-0.5 px-0">
+              <button
+                type="button"
+                onClick={logout}
+                className="flex min-h-11 w-full items-center gap-3 rounded-[10px] px-3 text-[15px] font-medium text-danger transition-opacity duration-200 active:opacity-70"
+              >
+                Çıkış yap
+              </button>
+            </div>
+            <p className="section-header mb-1 mt-6 px-3">Koleksiyonlar</p>
+            <ul className="space-y-0.5">
+              {sidebarCollections.map((item) => (
+                <li key={item.to}>
+                  <NavLink
+                    to={item.to}
+                    className={({ isActive }) =>
+                      cn(
+                        'flex min-h-11 items-center gap-3 rounded-[10px] px-3 text-[15px] transition-colors duration-200',
+                        isActive
+                          ? 'bg-soft-blue font-semibold text-accent'
+                          : 'text-secondary active:opacity-70',
                       )
                     }
                   >
@@ -84,75 +118,29 @@ export function AppShell() {
                 </li>
               ))}
             </ul>
-            <div>
-              <p className="mb-2 px-3 text-[12px] font-medium uppercase tracking-wide text-secondary">
-                Koleksiyonlar
-              </p>
-              <ul className="space-y-1">
-                {sidebarCollections.map((item) => (
-                  <li key={item.to}>
-                    <NavLink
-                      to={item.to}
-                      className={({ isActive }) =>
-                        cn(
-                          'flex touch-target items-center gap-3 rounded-[12px] px-3 text-[14px]',
-                          isActive ? 'bg-soft-blue font-medium text-accent' : 'text-secondary',
-                        )
-                      }
-                    >
-                      <item.icon size={18} strokeWidth={1.75} />
-                      {item.label}
-                    </NavLink>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="mt-auto">
-              <NavLink
-                to="/settings"
-                className={({ isActive }) =>
-                  cn(
-                    'flex touch-target items-center gap-3 rounded-[12px] px-3 text-[14px]',
-                    isActive ? 'bg-soft-blue font-medium text-accent' : 'text-secondary',
-                  )
-                }
-              >
-                <Settings size={18} strokeWidth={1.75} />
-                Ayarlar
-              </NavLink>
-            </div>
           </nav>
         </aside>
 
-        <main className="relative flex-1 pb-28 lg:pb-10">
-          <div className="mx-auto w-full max-w-[1040px] px-4 pt-5 lg:px-8 lg:pt-8">
-            <Outlet />
+        <main className="relative flex-1 pb-[calc(var(--tab-bar-height)+env(safe-area-inset-bottom,0px)+16px)] lg:pb-10">
+          <div className="mx-auto w-full max-w-[960px] px-5 pt-3 lg:pt-8">
+            <Outlet context={{ openPicker, openCreate }} />
           </div>
         </main>
       </div>
 
       <BottomNavigation />
 
-      <button
-        type="button"
-        aria-label="Ekle"
-        onClick={openPicker}
-        className="fixed right-4 bottom-[calc(72px+env(safe-area-inset-bottom,0px))] z-40 flex size-14 items-center justify-center rounded-full bg-accent text-white shadow-fab lg:hidden"
-      >
-        <Plus size={22} />
-      </button>
-
       <BottomSheet open={pickerOpen} onClose={closePicker} title="Ekle">
-        <ul className="space-y-1">
+        <ul className="-mx-5 divide-y divide-divider">
           {quickAddOptions.map((opt) => (
             <li key={opt.id}>
               <button
                 type="button"
-                className="flex min-h-11 w-full items-center gap-3 rounded-[12px] px-1 text-left text-[15px]"
+                className="flex min-h-[56px] w-full items-center gap-3 px-4 text-left active:opacity-70"
                 onClick={() => openCreate(opt.id)}
               >
                 <IconTile icon={opt.icon} bg={opt.bg} fg={opt.fg} size="sm" />
-                {opt.label}
+                <span className="text-[17px] leading-[22px] text-text">{opt.label}</span>
               </button>
             </li>
           ))}
@@ -174,17 +162,4 @@ export function AppShell() {
   )
 }
 
-export function DesktopAddButton({
-  onClick,
-  label = 'Ekle',
-}: {
-  onClick: () => void
-  label?: string
-}) {
-  return (
-    <Button variant="secondary" onClick={onClick} className="!min-h-10 px-3 text-[13px]">
-      <Plus size={16} />
-      {label}
-    </Button>
-  )
-}
+export { NavAddButton } from '../components/NavAddButton'

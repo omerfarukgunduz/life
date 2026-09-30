@@ -1,16 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Gift } from 'lucide-react'
 import {
   BottomSheet,
   Button,
   Dialog,
   EmptyState,
   IconTile,
+  ListSection,
+  NavAddButton,
   PageHeader,
   SegmentControl,
 } from '../../components'
-import { DesktopAddButton } from '../../layouts/AppShell'
 import { useQuickAdd } from '../../hooks/useQuickAdd'
 import { useToast } from '../../context/ToastContext'
 import { birthdaysApi } from '../../services/endpoints'
@@ -23,6 +23,7 @@ import {
   nextBirthdayDate,
   toDateOnly,
 } from '../../utils'
+import { collectionIcons } from '../../utils/collectionIcons'
 import { BirthdayForm } from './BirthdayForm'
 
 const filters: { id: BirthdayFilter; label: string }[] = [
@@ -60,8 +61,8 @@ export default function BirthdaysPage() {
     <section>
       <PageHeader
         title="Doğum Günleri"
-        action={
-          <DesktopAddButton onClick={() => openCreate('birthday')} label="Ekle" />
+        trailing={
+          <NavAddButton onClick={() => openCreate('birthday')} label="Doğum günü ekle" />
         }
       />
 
@@ -74,10 +75,8 @@ export default function BirthdaysPage() {
       />
 
       {isLoading ? (
-        <div className="space-y-2" aria-hidden>
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="h-12 animate-pulse rounded-[10px] bg-surface" />
-          ))}
+        <div className="grouped-list px-4 py-3" aria-hidden>
+          <div className="h-12 animate-pulse rounded-[8px] bg-bg" />
         </div>
       ) : null}
 
@@ -90,40 +89,44 @@ export default function BirthdaysPage() {
       ) : null}
 
       {data.length > 0 ? (
-      <ul className="surface divide-y divide-divider px-4">
-        {data.map((item) => {
-          const next = nextBirthdayDate(item.birthMonth, item.birthDay)
-          const nextKey = toDateOnly(next)
-          const left = daysUntil(nextKey)
-          const age =
-            item.birthYear != null
-              ? ageOnNextBirthday(item.birthYear, item.birthMonth, item.birthDay)
-              : null
-          return (
-            <li key={item.id}>
-              <button
-                type="button"
-                className="flex w-full min-h-11 items-center gap-3 py-3 text-left"
-                onClick={() => setEditing(item)}
-              >
-                <IconTile icon={Gift} bg="bg-soft-pink" fg="text-[#D4536A]" size="sm" />
-                <span className="w-12 shrink-0 text-[13px] font-medium text-text">
-                  {formatDayMonth(nextKey)}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[15px] font-medium text-text">
-                    {item.name}
-                    {age != null ? (
-                      <span className="font-normal text-secondary"> · {age}</span>
-                    ) : null}
-                  </p>
-                  <p className="text-[13px] text-secondary">{daysLeftLabel(left)}</p>
-                </div>
-              </button>
-            </li>
-          )
-        })}
-      </ul>
+        <ListSection>
+          <ul>
+            {data.map((item) => {
+              const next = nextBirthdayDate(item.birthMonth, item.birthDay)
+              const nextKey = toDateOnly(next)
+              const left = daysUntil(nextKey)
+              const age =
+                item.birthYear != null
+                  ? ageOnNextBirthday(item.birthYear, item.birthMonth, item.birthDay)
+                  : null
+              return (
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    className="flex min-h-[56px] w-full items-center gap-3 px-4 py-2.5 text-left active:opacity-70"
+                    onClick={() => setEditing(item)}
+                  >
+                    <IconTile {...collectionIcons.birthdays} size="sm" />
+                    <span className="w-[52px] shrink-0 text-[13px] font-medium leading-[18px] text-secondary tabular-nums">
+                      {formatDayMonth(nextKey)}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="headline block truncate text-text">
+                        {item.name}
+                        {age != null ? (
+                          <span className="font-normal text-secondary"> · {age}</span>
+                        ) : null}
+                      </span>
+                      <span className="subheadline mt-0.5 block text-secondary">
+                        {daysLeftLabel(left)}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        </ListSection>
       ) : null}
 
       <BottomSheet

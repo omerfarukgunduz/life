@@ -3,7 +3,16 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { Button, Checkbox, Dialog, Input, PageHeader, ThemeToggle } from '../../components'
+import {
+  Button,
+  Checkbox,
+  Dialog,
+  Input,
+  ListSection,
+  PageHeader,
+  ThemeToggle,
+} from '../../components'
+import { reminderScheduleHint } from '../dashboard/todayNotifications'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { useInstallPrompt } from '../../hooks/useInstallPrompt'
@@ -32,7 +41,7 @@ type EmailFormValues = z.infer<typeof emailSchema>
 type PasswordFormValues = z.infer<typeof passwordSchema>
 
 export default function SettingsPage() {
-  const { user, refresh } = useAuth()
+  const { user, refresh, logout } = useAuth()
   const { canInstall, promptInstall, isInstalled } = useInstallPrompt()
   const { toast } = useToast()
   const qc = useQueryClient()
@@ -58,8 +67,9 @@ export default function SettingsPage() {
 
   const updateSettings = useMutation({
     mutationFn: (next: UserSettings) => settingsApi.update(next),
-    onSuccess: (saved) => {
+    onSuccess: async (saved) => {
       qc.setQueryData(['settings'], saved)
+      await qc.invalidateQueries({ queryKey: ['dashboard'] })
       toast('Ayarlar kaydedildi')
     },
     onError: (err: unknown) => {
@@ -111,6 +121,7 @@ export default function SettingsPage() {
       notifyTasks: true,
       notifyBirthdays: true,
       notifyContests: true,
+      reminderTime: '09:00',
     }
     updateSettings.mutate({
       ...base,
@@ -195,21 +206,21 @@ export default function SettingsPage() {
   }
 
   return (
-    <section className="space-y-8">
+    <section className="pb-4">
       <PageHeader title="Ayarlar" />
 
-      <section className="surface space-y-4 p-4">
-        <h2 className="text-[15px] font-semibold text-text">Hesap</h2>
-        <p className="text-[13px] text-secondary">
-          Mevcut e-posta: <span className="text-text">{user?.email ?? '—'}</span>
-        </p>
+      <ListSection title="Hesap" settingsStyle>
+        <div className="space-y-4 px-4 py-3">
+          <p className="footnote text-secondary">
+            Mevcut e-posta: <span className="text-text">{user?.email ?? '—'}</span>
+          </p>
 
         <form
           className="space-y-3 border-t border-divider pt-4"
           onSubmit={emailForm.handleSubmit((values) => changeEmail.mutate(values))}
           noValidate
         >
-          <p className="text-[14px] font-medium text-text">E-posta değiştir</p>
+          <p className="headline text-text">E-posta değiştir</p>
           <Input
             label="Yeni e-posta"
             type="email"
@@ -224,7 +235,7 @@ export default function SettingsPage() {
             error={emailForm.formState.errors.currentPassword?.message}
             {...emailForm.register('currentPassword')}
           />
-          <Button type="submit" variant="secondary" disabled={changeEmail.isPending}>
+          <Button type="submit" variant="secondary" fullWidth disabled={changeEmail.isPending}>
             E-postayı kaydet
           </Button>
         </form>
@@ -234,7 +245,7 @@ export default function SettingsPage() {
           onSubmit={passwordForm.handleSubmit((values) => changePassword.mutate(values))}
           noValidate
         >
-          <p className="text-[14px] font-medium text-text">Parola değiştir</p>
+          <p className="headline text-text">Parola değiştir</p>
           <Input
             label="Mevcut parola"
             type="password"
@@ -256,75 +267,94 @@ export default function SettingsPage() {
             error={passwordForm.formState.errors.confirmPassword?.message}
             {...passwordForm.register('confirmPassword')}
           />
-          <Button type="submit" variant="secondary" disabled={changePassword.isPending}>
+          <Button type="submit" variant="secondary" fullWidth disabled={changePassword.isPending}>
             Parolayı kaydet
           </Button>
         </form>
-      </section>
+        </div>
+      </ListSection>
 
-      <section className="surface space-y-3 p-4">
-        <h2 className="text-[15px] font-semibold text-text">Görünüm</h2>
-        <ThemeToggle />
-      </section>
+      <ListSection title="Görünüm" settingsStyle>
+        <div className="flex min-h-[56px] items-center justify-between gap-3 px-4">
+          <span className="text-[17px] leading-[22px] text-text">Tema</span>
+          <ThemeToggle />
+        </div>
+      </ListSection>
 
-      <section className="surface space-y-3 p-4">
-        <h2 className="text-[15px] font-semibold text-text">Bildirimler</h2>
-        <Button
-          variant="secondary"
-          onClick={() => void enableNotifications()}
-          disabled={pushBusy}
-        >
-          Bildirimlere izin ver
-        </Button>
-        <ul className="divide-y divide-divider">
+      <ListSection title="Bildirimler" settingsStyle>
+        <div className="space-y-3 px-4 py-3">
+          <Button
+            variant="secondary"
+            fullWidth
+            onClick={() => void enableNotifications()}
+            disabled={pushBusy}
+          >
+            Bildirimlere izin ver
+          </Button>
+        </div>
+        <ul>
           {(
             [
-              ['notifyTasks', 'Görevler'] as const,
+              ['notifyTasks', 'İşler'] as const,
               ['notifyBirthdays', 'Doğum günleri'] as const,
               ['notifyContests', 'Yarışmalar'] as const,
             ] as const
           ).map(([key, label]) => (
-            <li key={key} className="flex items-center justify-between gap-3 py-2">
-              <span className="text-[15px] text-text">{label}</span>
-              <Checkbox
-                checked={settings?.[key] ?? true}
-                onChange={(checked) => patch({ [key]: checked })}
-                aria-label={label}
-                className="!min-h-0 !min-w-0"
-              />
+            <li key={key}>
+              <div className="flex min-h-[56px] items-center justify-between gap-3 px-4">
+                <span className="text-[17px] leading-[22px] text-text">{label}</span>
+                <Checkbox
+                  checked={settings?.[key] ?? true}
+                  onChange={(checked) => patch({ [key]: checked })}
+                  aria-label={label}
+                />
+              </div>
             </li>
           ))}
         </ul>
-        <p className="text-[13px] text-secondary">
-          Saat dilimi: {settings?.timeZone ?? getTimeZone()}
-        </p>
-      </section>
-
-      <section className="surface space-y-3 p-4">
-        <h2 className="text-[15px] font-semibold text-text">PWA</h2>
-        {isInstalled ? (
-          <p className="text-[14px] text-secondary">Yüklü</p>
-        ) : canInstall ? (
-          <Button
-            variant="secondary"
-            onClick={() => void promptInstall().then((ok) => ok && toast('Kurulum başlatıldı'))}
-          >
-            Uygulamayı yükle
-          </Button>
-        ) : (
-          <p className="text-[14px] text-secondary">
-            Yükleme istemi şu an kullanılamıyor. Destekleyen bir tarayıcıda ana ekrana eklenebilir.
+        <div className="space-y-2 border-t border-divider px-4 py-3">
+          <Input
+            label="Varsayılan bildirim saati"
+            type="time"
+            value={settings?.reminderTime ?? '09:00'}
+            onChange={(event) => patch({ reminderTime: event.target.value.slice(0, 5) })}
+            hint="Doğum günü ve yarışmalarda; vade saati olmayan işlerde kullanılır."
+          />
+          <p className="footnote text-secondary">
+            Saat dilimi: {settings?.timeZone ?? getTimeZone()}
           </p>
-        )}
-      </section>
+          <p className="footnote leading-relaxed text-secondary">
+            {reminderScheduleHint(settings?.reminderTime ?? '09:00')}
+          </p>
+        </div>
+      </ListSection>
 
-      <section className="surface space-y-3 p-4">
-        <h2 className="text-[15px] font-semibold text-text">Veri</h2>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Button variant="secondary" onClick={() => void exportData()}>
+      <ListSection title="PWA" settingsStyle>
+        <div className="px-4 py-3">
+          {isInstalled ? (
+            <p className="subheadline text-secondary">Yüklü</p>
+          ) : canInstall ? (
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => void promptInstall().then((ok) => ok && toast('Kurulum başlatıldı'))}
+            >
+              Uygulamayı yükle
+            </Button>
+          ) : (
+            <p className="subheadline text-secondary">
+              Yükleme istemi şu an kullanılamıyor. Destekleyen bir tarayıcıda ana ekrana eklenebilir.
+            </p>
+          )}
+        </div>
+      </ListSection>
+
+      <ListSection title="Veri" settingsStyle>
+        <div className="flex flex-col gap-2 px-4 py-3">
+          <Button variant="secondary" fullWidth onClick={() => void exportData()}>
             Dışa aktar
           </Button>
-          <Button variant="secondary" onClick={() => fileRef.current?.click()}>
+          <Button variant="secondary" fullWidth onClick={() => fileRef.current?.click()}>
             İçe aktar
           </Button>
           <input
@@ -335,12 +365,17 @@ export default function SettingsPage() {
             onChange={(e) => void onFile(e.target.files?.[0])}
           />
         </div>
-      </section>
+      </ListSection>
 
-      <section className="space-y-1">
-        <h2 className="text-[15px] font-semibold text-text">Hakkında</h2>
-        <p className="text-[14px] text-secondary">Life · sürüm 0.1.0</p>
-      </section>
+      <div className="grouped-list lg:hidden">
+        <button
+          type="button"
+          onClick={logout}
+          className="flex min-h-[56px] w-full items-center justify-center px-4 text-[17px] font-semibold text-danger active:opacity-70"
+        >
+          Çıkış yap
+        </button>
+      </div>
 
       <Dialog
         open={importOpen}

@@ -1,3 +1,5 @@
+import { Button } from './Button'
+
 type EmptyStateProps = {
   title?: string
   description?: string
@@ -15,17 +17,13 @@ export function EmptyState({
 }: EmptyStateProps) {
   const text = message ?? title ?? ''
   return (
-    <div className="py-6 text-[14px] text-secondary">
-      <p className="text-[14px] font-medium text-secondary">{text}</p>
-      {description ? <p className="mt-1 text-[13px]">{description}</p> : null}
+    <div className="px-4 py-6 text-center">
+      <p className="subheadline text-secondary">{text}</p>
+      {description ? <p className="footnote mt-1 text-secondary">{description}</p> : null}
       {actionLabel && onAction ? (
-        <button
-          type="button"
-          onClick={onAction}
-          className="mt-2 text-[14px] font-medium text-accent"
-        >
+        <Button variant="ghost" size="sm" className="mt-2 min-h-11" onClick={onAction}>
           {actionLabel}
-        </button>
+        </Button>
       ) : null}
     </div>
   )

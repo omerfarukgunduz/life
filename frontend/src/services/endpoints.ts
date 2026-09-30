@@ -10,6 +10,10 @@ import type {
   CalendarItem,
   Contest,
   ContestInput,
+  CustomCollection,
+  CustomCollectionInput,
+  CustomCollectionItem,
+  CustomCollectionItemInput,
   Dashboard,
   ExportData,
   Idea,
@@ -95,6 +99,30 @@ export const ideasApi = {
   update: (id: string, input: IdeaInput) =>
     api<Idea>(`/ideas/${id}`, { method: 'PUT', body: input }),
   remove: (id: string) => api<void>(`/ideas/${id}`, { method: 'DELETE' }),
+}
+
+export const customCollectionsApi = {
+  list: () => api<CustomCollection[]>('/custom-collections'),
+  get: (id: string) => api<CustomCollection>(`/custom-collections/${id}`),
+  create: (input: CustomCollectionInput) =>
+    api<CustomCollection>('/custom-collections', { method: 'POST', body: input }),
+  update: (id: string, input: CustomCollectionInput) =>
+    api<CustomCollection>(`/custom-collections/${id}`, { method: 'PUT', body: input }),
+  remove: (id: string) => api<void>(`/custom-collections/${id}`, { method: 'DELETE' }),
+  listItems: (collectionId: string) =>
+    api<CustomCollectionItem[]>(`/custom-collections/${collectionId}/items`),
+  createItem: (collectionId: string, input: CustomCollectionItemInput) =>
+    api<CustomCollectionItem>(`/custom-collections/${collectionId}/items`, {
+      method: 'POST',
+      body: input,
+    }),
+  updateItem: (collectionId: string, itemId: string, input: CustomCollectionItemInput) =>
+    api<CustomCollectionItem>(`/custom-collections/${collectionId}/items/${itemId}`, {
+      method: 'PUT',
+      body: input,
+    }),
+  removeItem: (collectionId: string, itemId: string) =>
+    api<void>(`/custom-collections/${collectionId}/items/${itemId}`, { method: 'DELETE' }),
 }
 
 export const dashboardApi = {

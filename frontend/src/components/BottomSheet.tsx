@@ -38,7 +38,7 @@ export function BottomSheet({
     <div className="fixed inset-0 z-[70]" role="presentation">
       <button
         type="button"
-        className="absolute inset-0 bg-black/30"
+        className="absolute inset-0 bg-black/25"
         aria-label="Kapat"
         onClick={onClose}
       />
@@ -47,19 +47,22 @@ export function BottomSheet({
         aria-modal="true"
         aria-label={title}
         className={cn(
-          'absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-y-auto rounded-t-[18px] border border-border bg-surface shadow-sheet',
+          'absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-y-auto rounded-t-[var(--radius-sheet)] bg-surface shadow-[var(--shadow-subtle)]',
           'pb-[env(safe-area-inset-bottom)]',
-          'lg:inset-x-auto lg:bottom-8 lg:left-1/2 lg:w-full lg:max-w-lg lg:-translate-x-1/2 lg:rounded-[18px]',
+          'lg:inset-x-auto lg:bottom-8 lg:left-1/2 lg:w-full lg:max-w-lg lg:-translate-x-1/2 lg:rounded-[var(--radius-sheet)]',
           className,
         )}
       >
-        <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-          <h2 className="text-base font-semibold text-text">{title}</h2>
+        <div className="flex justify-center pt-2.5">
+          <span className="h-1 w-9 rounded-full bg-border" aria-hidden />
+        </div>
+        <div className="flex items-center justify-between gap-3 border-b border-divider px-5 py-3">
+          <h2 className="headline text-text">{title}</h2>
           <IconButton label="Kapat" onClick={onClose}>
-            <X size={20} strokeWidth={1.75} />
+            <X size={20} strokeWidth={2} />
           </IconButton>
         </div>
-        <div className="px-4 py-4">{children}</div>
+        <div className="px-5 py-4">{children}</div>
       </div>
     </div>
   )

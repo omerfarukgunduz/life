@@ -1,3 +1,5 @@
+using Life.Api.Services;
+
 namespace Life.Api.DTOs;
 
 public class ExportDataDto
@@ -8,6 +10,7 @@ public class ExportDataDto
     public List<ExportContestDto> Contests { get; set; } = new();
     public List<ExportBookDto> Books { get; set; } = new();
     public List<ExportIdeaDto> Ideas { get; set; } = new();
+    public List<ExportCustomCollectionDto>? CustomCollections { get; set; }
     public List<ExportPushSubscriptionDto>? PushSubscriptions { get; set; }
 }
 
@@ -59,6 +62,25 @@ public class ExportBookDto
 }
 
 public class ExportIdeaDto
+{
+    public string Title { get; set; } = string.Empty;
+    public string? Content { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+}
+
+public class ExportCustomCollectionDto
+{
+    public string Name { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public string IconKey { get; set; } = CustomCollectionAppearance.DefaultIconKey;
+    public string ColorKey { get; set; } = CustomCollectionAppearance.DefaultColorKey;
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+    public List<ExportCustomCollectionItemDto> Items { get; set; } = new();
+}
+
+public class ExportCustomCollectionItemDto
 {
     public string Title { get; set; } = string.Empty;
     public string? Content { get; set; }

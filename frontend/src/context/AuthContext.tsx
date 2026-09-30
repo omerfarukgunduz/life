@@ -81,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         notifyTasks: true,
         notifyBirthdays: true,
         notifyContests: true,
+        reminderTime: '09:00',
       })
     } catch {
       // ignore

@@ -7,6 +7,7 @@ public class UserSettings
     public bool NotifyTasks { get; set; } = true;
     public bool NotifyBirthdays { get; set; } = true;
     public bool NotifyContests { get; set; } = true;
+    public TimeOnly ReminderTime { get; set; } = new(9, 0);
 
     public User User { get; set; } = null!;
 }

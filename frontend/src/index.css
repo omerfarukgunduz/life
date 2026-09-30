@@ -1,54 +1,68 @@
 @import 'tailwindcss';
-@import '@fontsource/inter/400.css';
-@import '@fontsource/inter/500.css';
-@import '@fontsource/inter/600.css';
-@import '@fontsource/inter/700.css';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-bg: #f7f7f5;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', sans-serif;
+
+  --color-bg: #f2f2f7;
   --color-surface: #ffffff;
-  --color-text: #111111;
-  --color-secondary: #737373;
-  --color-border: #e7e7e5;
-  --color-divider: #ecece8;
-  --color-accent: #2563eb;
-  --color-primary: #2563eb;
-  --color-primary-fg: #ffffff;
-  --color-soft-blue: #eef4ff;
+  --color-surface-secondary: #ffffff;
+  --color-surface-tertiary: #f7f7fa;
+  --color-text: #000000;
+  --color-secondary: #8e8e93;
+  --color-tertiary: #c7c7cc;
+  --color-border: #e5e5ea;
+  --color-divider: #e5e5ea;
+  --color-accent: #007aff;
+  --color-success: #34c759;
+  --color-warning: #ff9500;
+  --color-danger: #ff3b30;
+  --color-soft-blue: #eaf3ff;
   --color-soft-purple: #f2ecff;
-  --color-soft-pink: #fcedee;
+  --color-soft-pink: #fff0f0;
   --color-soft-green: #eaf7ec;
-  --color-soft-yellow: #fbf3e4;
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --radius-sm: 12px;
-  --radius-md: 14px;
-  --radius-lg: 18px;
-  --shadow-card: 0 1px 2px rgb(17 17 17 / 0.04);
-  --shadow-sheet: 0 -8px 30px rgb(17 17 17 / 0.06);
-  --shadow-toast: 0 8px 24px rgb(17 17 17 / 0.08);
-  --shadow-fab: 0 8px 18px rgb(37 99 235 / 0.28);
+  --color-soft-yellow: #fff5e6;
+  --color-segment-track: #e9e9eb;
+
+  --radius-control: 8px;
+  --radius-input: 10px;
+  --radius-button: 12px;
+  --radius-group: 12px;
+  --radius-sheet: 20px;
+
+  --shadow-subtle: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 14px rgb(0 0 0 / 0.04);
+  --shadow-segment: 0 1px 3px rgb(0 0 0 / 0.12);
+
+  --page-gutter: 20px;
+  --section-gap: 24px;
+  --row-padding-x: 16px;
+  --tab-bar-height: 50px;
 }
 
 .dark {
-  --color-bg: #111111;
-  --color-surface: #1a1a1a;
-  --color-text: #f3f3f3;
-  --color-secondary: #b8b8b8;
-  --color-border: #383838;
-  --color-divider: #303030;
-  --color-accent: #5b9cf6;
-  --color-primary: #5b9cf6;
-  --color-primary-fg: #ffffff;
-  --color-soft-blue: #243552;
-  --color-soft-purple: #352d48;
-  --color-soft-pink: #4a2a32;
-  --color-soft-green: #243830;
-  --color-soft-yellow: #3d3424;
-  --shadow-card: 0 1px 3px rgb(0 0 0 / 0.35);
-  --shadow-sheet: 0 -8px 30px rgb(0 0 0 / 0.5);
-  --shadow-toast: 0 8px 24px rgb(0 0 0 / 0.45);
+  --color-bg: #000000;
+  --color-surface: #1c1c1e;
+  --color-surface-secondary: #2c2c2e;
+  --color-surface-tertiary: #2c2c2e;
+  --color-text: #ffffff;
+  --color-secondary: #98989d;
+  --color-tertiary: #636366;
+  --color-border: #38383a;
+  --color-divider: #38383a;
+  --color-accent: #0a84ff;
+  --color-success: #30d158;
+  --color-warning: #ff9f0a;
+  --color-danger: #ff453a;
+  --color-soft-blue: #1c2a3d;
+  --color-soft-purple: #2a2438;
+  --color-soft-pink: #3a2428;
+  --color-soft-green: #1f3329;
+  --color-soft-yellow: #3d3420;
+  --color-segment-track: #2c2c2e;
+  --shadow-subtle: 0 1px 2px rgb(0 0 0 / 0.35);
+  --shadow-segment: 0 2px 8px rgb(0 0 0 / 0.35);
 }
 
 @layer base {
@@ -61,12 +75,16 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    overflow-x: hidden;
   }
 
   body {
     margin: 0;
     min-height: 100dvh;
+    overflow-x: hidden;
     font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.294;
     background-color: var(--color-bg);
     color: var(--color-text);
     -webkit-font-smoothing: antialiased;
@@ -75,6 +93,7 @@
 
   #root {
     min-height: 100dvh;
+    overflow-x: hidden;
   }
 
   button,
@@ -84,6 +103,20 @@
     font: inherit;
   }
 
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  a[href],
+  label[for],
+  select:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  select:disabled {
+    cursor: not-allowed;
+  }
+
   :focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
@@ -91,17 +124,109 @@
 }
 
 @utility surface {
-  border-radius: 18px;
-  border: 1px solid var(--color-border);
+  border-radius: var(--radius-group);
   background: var(--color-surface);
-  box-shadow: var(--shadow-card);
+}
+
+@utility grouped-list {
+  border-radius: var(--radius-group);
+  background: var(--color-surface);
+  overflow: hidden;
+
+  & ul > li + li {
+    border-top: 0.5px solid var(--color-divider);
+  }
+}
+
+@utility row-separator {
+  border-bottom: 0.5px solid var(--color-divider);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+@utility ios-tab-bar {
+  background: rgb(255 255 255 / 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 0.5px solid var(--color-border);
+}
+
+@utility segment-track {
+  height: 36px;
+  padding: 2px;
+  border-radius: 9px;
+  background: var(--color-segment-track);
+}
+
+@utility segment-active {
+  border-radius: 7px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-segment);
+  color: var(--color-text);
+}
+
+@utility page-gutter {
+  padding-left: var(--page-gutter);
+  padding-right: var(--page-gutter);
+}
+
+@utility large-title {
+  font-size: 34px;
+  line-height: 41px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+@utility title-2 {
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 700;
+}
+
+@utility title-3 {
+  font-size: 20px;
+  line-height: 25px;
+  font-weight: 600;
+}
+
+@utility headline {
+  font-size: 17px;
+  line-height: 22px;
+  font-weight: 600;
+}
+
+@utility subheadline {
+  font-size: 15px;
+  line-height: 20px;
+}
+
+@utility footnote {
+  font-size: 13px;
+  line-height: 18px;
+}
+
+@utility caption-text {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+@utility section-header {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--color-secondary);
 }
 
 .safe-bottom {
-  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-.touch-target {
-  min-height: 44px;
-  min-width: 44px;
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.dark .ios-tab-bar {
+  background: rgb(28 28 30 / 0.92);
 }

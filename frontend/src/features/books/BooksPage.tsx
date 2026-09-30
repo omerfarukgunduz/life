@@ -8,10 +8,11 @@ import {
   Button,
   Dialog,
   EmptyState,
+  ListSection,
+  NavAddButton,
   PageHeader,
   SegmentControl,
 } from '../../components'
-import { DesktopAddButton } from '../../layouts/AppShell'
 import { useQuickAdd } from '../../hooks/useQuickAdd'
 import { useToast } from '../../context/ToastContext'
 import { booksApi } from '../../services/endpoints'
@@ -58,7 +59,7 @@ export default function BooksPage() {
     <section>
       <PageHeader
         title="Kitaplar"
-        action={<DesktopAddButton onClick={() => openCreate('book')} label="Ekle" />}
+        trailing={<NavAddButton onClick={() => openCreate('book')} label="Kitap ekle" />}
       />
 
       <SegmentControl
@@ -70,10 +71,8 @@ export default function BooksPage() {
       />
 
       {isLoading ? (
-        <div className="space-y-2" aria-hidden>
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="h-12 animate-pulse rounded-[10px] bg-surface" />
-          ))}
+        <div className="grouped-list px-4 py-3" aria-hidden>
+          <div className="h-14 animate-pulse rounded-[8px] bg-bg" />
         </div>
       ) : null}
 
@@ -82,7 +81,7 @@ export default function BooksPage() {
           message={
             status === 'Reading'
               ? 'Şu anda okuduğun bir kitap yok.'
-              : 'Kitap yok.'
+              : 'Henüz kitap eklemedin.'
           }
           actionLabel="Kitap ekle"
           onAction={() => openCreate('book')}
@@ -90,57 +89,59 @@ export default function BooksPage() {
       ) : null}
 
       {data.length > 0 ? (
-      <ul className="surface divide-y divide-divider px-4">
-        {data.map((book) => (
-          <li key={book.id}>
-            <button
-              type="button"
-              className="flex w-full items-center gap-3 py-3 text-left"
-              onClick={() => setEditing(book)}
-            >
-              <BookCover title={book.title} author={book.author} />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-[15px] font-semibold text-text">
-                  {book.title}
-                </span>
-                <span className="mt-0.5 block truncate text-[13px] text-secondary">
-                  {book.author}
-                </span>
-                {book.status === 'Reading' ? (
-                  <span className="mt-2 block text-[12px] text-secondary">Okuyorum</span>
-                ) : null}
-                {book.status === 'WantToRead' ? (
-                  <span className="mt-2 block text-[12px] text-secondary">
-                    {statusLabel.WantToRead}
-                  </span>
-                ) : null}
-                {book.status === 'Read' ? (
-                  <span className="mt-2 flex items-center gap-2 text-[12px] text-secondary">
-                    {book.rating != null ? (
-                      <span className="inline-flex items-center gap-0.5 text-text">
-                        {Array.from({ length: 5 }, (_, index) => (
-                          <Star
-                            key={index}
-                            size={12}
-                            className={
-                              index < book.rating!
-                                ? 'fill-[#111111] text-[#111111] dark:fill-white dark:text-white'
-                                : 'text-[#D4D4D2]'
-                            }
-                          />
-                        ))}
+        <ListSection>
+          <ul>
+            {data.map((book) => (
+              <li key={book.id}>
+                <button
+                  type="button"
+                  className="flex min-h-[56px] w-full items-center gap-3 px-4 py-3 text-left active:opacity-70"
+                  onClick={() => setEditing(book)}
+                >
+                  <BookCover title={book.title} author={book.author} />
+                  <span className="min-w-0 flex-1">
+                    <span className="headline block truncate text-text">{book.title}</span>
+                    <span className="subheadline mt-0.5 block truncate text-secondary">
+                      {book.author}
+                    </span>
+                    {book.status === 'Reading' ? (
+                      <span className="caption-text mt-1 block text-secondary">
+                        {statusLabel.Reading}
                       </span>
-                    ) : (
-                      <span>{statusLabel.Read}</span>
-                    )}
-                    {book.finishedAt ? <span>{formatShortDate(book.finishedAt)}</span> : null}
+                    ) : null}
+                    {book.status === 'WantToRead' ? (
+                      <span className="caption-text mt-1 block text-secondary">
+                        {statusLabel.WantToRead}
+                      </span>
+                    ) : null}
+                    {book.status === 'Read' ? (
+                      <span className="caption-text mt-1 flex flex-wrap items-center gap-2 text-secondary">
+                        {book.rating != null ? (
+                          <span className="inline-flex items-center gap-0.5 text-text">
+                            {Array.from({ length: 5 }, (_, index) => (
+                              <Star
+                                key={index}
+                                size={12}
+                                className={
+                                  index < book.rating!
+                                    ? 'fill-accent text-accent'
+                                    : 'text-tertiary'
+                                }
+                              />
+                            ))}
+                          </span>
+                        ) : (
+                          <span>{statusLabel.Read}</span>
+                        )}
+                        {book.finishedAt ? <span>{formatShortDate(book.finishedAt)}</span> : null}
+                      </span>
+                    ) : null}
                   </span>
-                ) : null}
-              </span>
-            </button>
-          </li>
-        ))}
-      </ul>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </ListSection>
       ) : null}
 
       <BottomSheet

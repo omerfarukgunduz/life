@@ -50,7 +50,15 @@ public class AuthController : ControllerBase
         var user = new User { Id = Guid.NewGuid(), Email = email, CreatedAt = DateTime.UtcNow };
         user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
         _db.Users.Add(user);
-        _db.UserSettings.Add(new UserSettings { UserId = user.Id, TimeZone = TimeZoneHelper.DefaultTimeZone, NotifyTasks = true, NotifyBirthdays = true, NotifyContests = true });
+        _db.UserSettings.Add(new UserSettings
+        {
+            UserId = user.Id,
+            TimeZone = TimeZoneHelper.DefaultTimeZone,
+            NotifyTasks = true,
+            NotifyBirthdays = true,
+            NotifyContests = true,
+            ReminderTime = ReminderService.DefaultReminderTime,
+        });
         await _db.SaveChangesAsync(ct);
         return Ok(new AuthResponse(_jwt.CreateToken(user), user.Email, user.Id));
     }

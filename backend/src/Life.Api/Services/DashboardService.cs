@@ -39,7 +39,54 @@ public class DashboardService
         var readingBook = await _db.Books.AsNoTracking()
             .Where(b => b.UserId == userId && b.Status == BookStatus.Reading)
             .OrderByDescending(b => b.StartedAt).ThenByDescending(b => b.CreatedAt).FirstOrDefaultAsync(ct);
-        return new DashboardDto(todayTasks, ordered, readingBook is null ? null : Mappers.ToDto(readingBook));
+        var todayReminders = await GetTodayRemindersAsync(userId, tz, today, ct);
+        return new DashboardDto(todayTasks, ordered, readingBook is null ? null : Mappers.ToDto(readingBook), todayReminders);
+    }
+
+    private async Task<IReadOnlyList<TodayReminderItemDto>> GetTodayRemindersAsync(
+        Guid userId,
+        TimeZoneInfo tz,
+        DateOnly today,
+        CancellationToken ct)
+    {
+        var dayStart = TimeZoneHelper.ToUtc(today, TimeOnly.MinValue, tz);
+        var dayEnd = TimeZoneHelper.ToUtc(today.AddDays(1), TimeOnly.MinValue, tz);
+        var reminders = await _db.Reminders.AsNoTracking()
+            .Where(r => r.UserId == userId && r.ReminderAt >= dayStart && r.ReminderAt < dayEnd)
+            .OrderBy(r => r.ReminderAt)
+            .ToListAsync(ct);
+        if (reminders.Count == 0) return Array.Empty<TodayReminderItemDto>();
+
+        var taskIds = reminders.Where(r => r.EntityType == EntityType.Task).Select(r => r.EntityId).ToHashSet();
+        var birthdayIds = reminders.Where(r => r.EntityType == EntityType.Birthday).Select(r => r.EntityId).ToHashSet();
+        var contestIds = reminders.Where(r => r.EntityType == EntityType.Contest).Select(r => r.EntityId).ToHashSet();
+
+        var tasks = taskIds.Count == 0
+            ? new Dictionary<Guid, TaskItem>()
+            : await _db.Tasks.AsNoTracking().Where(t => taskIds.Contains(t.Id)).ToDictionaryAsync(t => t.Id, ct);
+        var birthdays = birthdayIds.Count == 0
+            ? new Dictionary<Guid, Birthday>()
+            : await _db.Birthdays.AsNoTracking().Where(b => birthdayIds.Contains(b.Id)).ToDictionaryAsync(b => b.Id, ct);
+        var contests = contestIds.Count == 0
+            ? new Dictionary<Guid, PhotographyContest>()
+            : await _db.Contests.AsNoTracking().Where(c => contestIds.Contains(c.Id)).ToDictionaryAsync(c => c.Id, ct);
+
+        var items = new List<TodayReminderItemDto>();
+        foreach (var reminder in reminders)
+        {
+            var (type, title) = reminder.EntityType switch
+            {
+                EntityType.Task when tasks.TryGetValue(reminder.EntityId, out var task) => ("task", task.Title),
+                EntityType.Birthday when birthdays.TryGetValue(reminder.EntityId, out var birthday) => ("birthday", birthday.Name),
+                EntityType.Contest when contests.TryGetValue(reminder.EntityId, out var contest) => ("contest", contest.Title),
+                EntityType.Task => ("task", "İş"),
+                EntityType.Birthday => ("birthday", "Doğum günü"),
+                EntityType.Contest => ("contest", "Yarışma"),
+                _ => ("task", "Hatırlatma"),
+            };
+            items.Add(new TodayReminderItemDto(type, reminder.EntityId, title, reminder.ReminderAt, reminder.Sent));
+        }
+        return items;
     }
 
     public async Task<IReadOnlyList<CalendarItemDto>> GetCalendarAsync(Guid userId, DateOnly from, DateOnly to, string? timeZone, CancellationToken ct = default)

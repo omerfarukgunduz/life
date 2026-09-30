@@ -14,6 +14,8 @@ public class LifeDbContext : DbContext
     public DbSet<PhotographyContest> Contests => Set<PhotographyContest>();
     public DbSet<Book> Books => Set<Book>();
     public DbSet<Idea> Ideas => Set<Idea>();
+    public DbSet<CustomCollection> CustomCollections => Set<CustomCollection>();
+    public DbSet<CustomCollectionItem> CustomCollectionItems => Set<CustomCollectionItem>();
     public DbSet<Reminder> Reminders => Set<Reminder>();
     public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
 

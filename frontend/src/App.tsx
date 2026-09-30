@@ -10,6 +10,9 @@ const TasksPage = lazy(() => import('./features/tasks/TasksPage'))
 const CollectionsPage = lazy(
   () => import('./features/collections/CollectionsPage'),
 )
+const CustomCollectionPage = lazy(
+  () => import('./features/collections/CustomCollectionPage'),
+)
 const BirthdaysPage = lazy(() => import('./features/birthdays/BirthdaysPage'))
 const ContestsPage = lazy(() => import('./features/contests/ContestsPage'))
 const BooksPage = lazy(() => import('./features/books/BooksPage'))
@@ -107,6 +110,14 @@ export default function App() {
           element={
             <Lazy>
               <IdeasPage />
+            </Lazy>
+          }
+        />
+        <Route
+          path="collections/c/:collectionId"
+          element={
+            <Lazy>
+              <CustomCollectionPage />
             </Lazy>
           }
         />

@@ -8,6 +8,7 @@ using Life.Api.Services;
 using Life.Api.Validation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -100,10 +101,22 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseExceptionHandler();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseDefaultFiles();
+    var contentTypes = new FileExtensionContentTypeProvider();
+    contentTypes.Mappings[".webmanifest"] = "application/manifest+json";
+    app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = contentTypes });
+}
+
 app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+if (!app.Environment.IsDevelopment())
+    app.MapFallbackToFile("index.html");
 
 using (var scope = app.Services.CreateScope())
 {

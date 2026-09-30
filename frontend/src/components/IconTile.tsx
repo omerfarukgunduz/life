@@ -12,22 +12,22 @@ type Tone = {
 
 const categoryTones: Record<string, Tone> = {
   Kişisel: { icon: Check, bg: 'bg-soft-blue', fg: 'text-accent' },
-  Fotoğraf: { icon: Camera, bg: 'bg-soft-purple', fg: 'text-[#7C5CBF]' },
-  İş: { icon: Flag, bg: 'bg-soft-pink', fg: 'text-[#D4536A]' },
+  Fotoğraf: { icon: Camera, bg: 'bg-soft-purple', fg: 'text-[#AF52DE] dark:text-[#BF5AF2]' },
+  İş: { icon: Flag, bg: 'bg-soft-pink', fg: 'text-danger' },
   Yazılım: { icon: Code2, bg: 'bg-soft-blue', fg: 'text-accent' },
-  Diğer: { icon: MoreHorizontal, bg: 'bg-soft-yellow', fg: 'text-[#C48A2A]' },
+  Diğer: { icon: MoreHorizontal, bg: 'bg-soft-yellow', fg: 'text-warning' },
 }
 
 const typeTones: Record<UpcomingType, Tone> = {
   task: { icon: Check, bg: 'bg-soft-blue', fg: 'text-accent', dot: 'bg-accent' },
-  birthday: { icon: Gift, bg: 'bg-soft-pink', fg: 'text-[#D4536A]', dot: 'bg-[#D4536A]' },
-  contest: { icon: Trophy, bg: 'bg-soft-yellow', fg: 'text-[#C48A2A]', dot: 'bg-[#C48A2A]' },
+  birthday: { icon: Gift, bg: 'bg-soft-pink', fg: 'text-danger', dot: 'bg-danger' },
+  contest: { icon: Trophy, bg: 'bg-soft-yellow', fg: 'text-warning', dot: 'bg-warning' },
 }
 
 const fallbackTone: Tone = {
   icon: MoreHorizontal,
   bg: 'bg-soft-yellow',
-  fg: 'text-[#C48A2A]',
+  fg: 'text-warning',
 }
 
 export function categoryTone(category: string | null | undefined): Tone {
@@ -48,16 +48,16 @@ export function IconTile({
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center justify-center rounded-[12px]',
-        size === 'sm' && 'size-9',
-        size === 'md' && 'size-10',
-        size === 'lg' && 'size-12 rounded-[14px]',
+        'inline-flex shrink-0 items-center justify-center rounded-[10px]',
+        size === 'sm' && 'size-8',
+        size === 'md' && 'size-9',
+        size === 'lg' && 'size-11',
         bg,
         fg,
       )}
       aria-hidden
     >
-      <Icon size={size === 'lg' ? 20 : 18} strokeWidth={1.75} />
+      <Icon size={size === 'lg' ? 22 : 16} strokeWidth={1.75} />
     </span>
   )
 }
